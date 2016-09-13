@@ -161,13 +161,25 @@ sub __poHeader {
 	my ($self) = @_;
 
     my $options = $self->{__options};
+    
+    my $user_info;
+    if ($options->{foreign_user}) {
+    	$user_info = <<EOF;
+This file is put in the public domain.
+EOF
+    } else {
+    	$user_info = <<EOF;
+Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+This file is distributed under the same license as the PACKAGE package.
+EOF
+    }
+    chomp $user_info;
 	
 	my $entry = Locale::PO->new;
 	$entry->fuzzy(1);
 	$entry->comment(<<EOF);
 SOME DESCRIPTIVE TITLE.
-Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-This file is distributed under the same license as the PACKAGE package.
+$user_info
 FIRST AUTHOR <EMAIL\@ADDRESS>, YEAR.
 EOF
     $entry->msgid('');
