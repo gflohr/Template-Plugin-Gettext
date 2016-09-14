@@ -168,8 +168,11 @@ sub __poHeader {
 This file is put in the public domain.
 EOF
     } else {
+    	my $copyright = $options->{copyright_holder};
+    	$copyright = "THE PACKAGE'S COPYRIGHT HOLDER" if !defined $copyright;
+    	
     	$user_info = <<EOF;
-Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+Copyright (C) YEAR $copyright
 This file is distributed under the same license as the PACKAGE package.
 EOF
     }
