@@ -347,7 +347,7 @@ sub split_text {
                 $string =~ s/\\([\\'])/$1/gs;
                 my $method = $properties{$type};
                 $entry->$method($string);
-
+                
                 $offset += 2;
 
                 if ($type ne $schema->[-1]) {
@@ -366,6 +366,12 @@ sub split_text {
             } else {
                 return;
             }
+        }
+
+        if (defined $entry->msgid_plural && length $entry->msgid_plural) {
+            $entry->msgstr_n({0 => '', 1 => ''});
+        } else {
+            $entry->msgstr('');       	
         }
 
         # We ignore excess elements.
