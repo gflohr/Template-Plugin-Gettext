@@ -219,7 +219,8 @@ sub __getEntriesFromFile {
 	my ($self, $filename) = @_;
 
     my %options = (
-        INTERPOLATE => 1
+        INTERPOLATE => 1,
+        RELATIVE => 1
     );
     
     my $parser = Locale::XGettext::TT2::Parser->new(\%options);
