@@ -114,7 +114,10 @@ sub run {
     
     my $po = Locale::XGettext::TT2::POEntries->new;
     foreach my $filename (@{$self->{__files}}) {
-    	my $entries = $self->__getEntriesFromFile($filename);
+    	my $path = $self->__resolveFilename($filename)
+    	    or die __x("Error opening '{filename}': {error}!\n",
+    	               filename => $filename, error => $!);
+    	my $entries = $self->__getEntriesFromFile($path);
         unless ($self->{__options}->{no_location}) {
             foreach my $entry (@$entries) {
             	$self->__addLocation($entry, $filename);
@@ -133,6 +136,18 @@ sub run {
     $self->{__po} = $po;
     
     return $self;
+}
+
+sub __resolveFilename {
+	my ($self, $filename) = @_;
+	
+	my $directories = $self->{__options}->{directory} || ['.'];
+	foreach my $directory (@$directories) {
+		my $path = File::Spec->catfile($directory, $filename);
+		stat $path && return $path;
+	}
+	
+	return;
 }
 
 sub __addLocation {

@@ -83,7 +83,7 @@ sub __getOptions {
     GetOptionsFromArray($argv,
         # Input file location:
         'f|files-from=s@' => \$options{files_from},
-        'D|directory=s' => \$options{directory},
+        'D|directory=s@' => \$options{directory},
 
         # Output file location:
         'd|default-domain=s' => \$options{default_domain},
