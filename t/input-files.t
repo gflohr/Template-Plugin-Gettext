@@ -24,13 +24,14 @@ use Test::More tests => 9;
 
 use Locale::XGettext::TT2;
 
-my $test_dir = __FILE__;
-$test_dir =~ s/[-a-z0-9]+\.t$//i;
-chdir $test_dir or die "cannot chdir to $test_dir: $!";
+BEGIN {
+    my $test_dir = __FILE__;
+    $test_dir =~ s/[-a-z0-9]+\.t$//i;
+    chdir $test_dir or die "cannot chdir to $test_dir: $!";
+    unshift @INC, '.';
+}
 
-my $sep = '(?:"|\\\\n)';
-
-sub find_entries;
+use TestLib qw(find_entries);
 
 my $po = Locale::XGettext::TT2->new({}, 
                                     'templates/template.tt', 
@@ -53,16 +54,3 @@ $po = Locale::XGettext::TT2->new({files_from => ['POTFILES1', 'POTFILES2']})
 is((scalar find_entries $po, msgid => qq{"Hello, world!\\n"}), 1);
 is((scalar find_entries $po, msgid => qq{"Hello, Mars!\\n"}), 1);
 is((scalar find_entries $po, msgid => qq{"Hello, extraterrestrials!\\n"}), 1);
-
-sub find_entries {
-    my ($po, %args) = @_;
-
-    my @hits;
-    foreach my $entry (@$po) {
-        next if exists $args{msgid} && $entry->msgid ne $args{msgid};
-        next if exists $args{msgstr} && $entry->msgstr ne $args{msgstr};
-        push @hits, $entry;
-    }
-
-    return @hits;
-}
