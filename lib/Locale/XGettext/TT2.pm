@@ -114,7 +114,13 @@ sub run {
     
     my $po = Locale::XGettext::TT2::POEntries->new;
     foreach my $filename (@{$self->{__files}}) {
-    	$po->addEntries($self->__getEntriesFromFile($filename));
+    	my $entries = $self->__getEntriesFromFile($filename);
+        unless ($self->{__options}->{no_location}) {
+            foreach my $entry (@$entries) {
+            	$self->__addLocation($entry, $filename);
+            }
+        }
+        $po->addEntries($entries);
     }
 
     # FIXME! Sort po!
@@ -125,6 +131,32 @@ sub run {
     }
 
     $self->{__po} = $po;
+    
+    return $self;
+}
+
+sub __addLocation {
+	my ($self, $entry, $filename) = @_;
+
+    my $new_ref = "$filename:$entry->{__xgettext_tt_lineno}";
+    
+    my $reference = $entry->reference;
+    my @lines = split "\n", $reference;
+    if (!@lines) {
+    	push @lines, $new_ref;
+    } else {
+    	my $last_line = $lines[-1];
+    	my $ref_length = 1 + length $new_ref;
+    	if ($ref_length > 76) {
+    		push @lines, $new_ref;
+    	} elsif ($ref_length + length $last_line > 76) {
+    		push @lines, $new_ref;
+    	} else {
+    		$lines[-1] .= ' ' . $new_ref;
+    	}
+    }
+    
+    $entry->reference(join "\n", @lines);
     
     return $self;
 }
@@ -410,6 +442,8 @@ sub split_text {
              my $entry = extract_args $tokens, 6, $tokens->[5];
              next if !$entry;
 
+             $entry->{__xgettext_tt_lineno} = $lineno;
+             
              $entries->add($entry);
          }
     }
