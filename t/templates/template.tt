@@ -1,2 +1,20 @@
 [% USE gtx = Gettext %]
 [% gtx.gettext("Hello, world!\n") %]
+
+[% # TRANSLATORS: A translator comment.
+   gtx.gettext("Translator comment above.\n") %]
+
+[% #            TRANSLATORS: Leading whitespace is insignificant.
+   gtx.gettext("Translator comment with leading whitespace above.") %]
+   
+[% # TRANSLATORS: A translator comment
+   # that spans multiple lines.
+   gtx.gettext("Multi-line translator comment above.\n") %]
+
+[% 
+   # TRANSLATORS: A translator comment
+   # that spans multiple lines and has an empty line above.
+   gtx.gettext("Multi-line translator comment with leading empty line  above.\n") %]
+
+[% # A normal comment.
+   gtx.gettext("A normal comment above.") %]
