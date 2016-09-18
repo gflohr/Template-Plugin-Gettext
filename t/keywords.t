@@ -22,12 +22,16 @@ use strict;
 
 use Test::More tests => 15;
 
-use Locale::XGettext::TT2;
-use Locale::XGettext::TT2::Keyword;
+BEGIN {
+    my $test_dir = __FILE__;
+    $test_dir =~ s/[-a-z0-9]+\.t$//i;
+    chdir $test_dir or die "cannot chdir to $test_dir: $!";
+    unshift @INC, '.';
+}
+
+use TestLib qw(use_keywords);
 
 my (%keywords, $okay);
-
-sub use_keywords($);
 
 %keywords = (foo => ['']);
 $okay = eval { use_keywords \%keywords };
@@ -101,16 +105,3 @@ ok !$okay, $@;
 %keywords = (foo => [1, '', 3]);
 $okay = eval { use_keywords \%keywords };
 ok !$okay;
-
-sub use_keywords($) {
-    my ($keywords) = @_;
-
-    foreach my $method (keys %$keywords) {
-        $keywords{$method} = 
-            Locale::XGettext::TT2::Keyword->new($method,
-                                                @{$keywords{$method}});
-    }
-
-    Locale::XGettext::TT2->new({keywords => $keywords}, 'dummy');
-}
-
