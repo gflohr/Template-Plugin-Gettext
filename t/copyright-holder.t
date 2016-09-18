@@ -28,9 +28,9 @@ my $test_dir = __FILE__;
 $test_dir =~ s/[-a-z0-9]+\.t$//i;
 chdir $test_dir or die "cannot chdir to $test_dir: $!";
 
-my $po = Locale::XGettext::TT2->new({}, 'template.tt')->run->po;
+my $po = Locale::XGettext::TT2->new({}, 'templates/template.tt')->run->po;
 like $po->[0]->comment, qr/\nCopyright \(C\) YEAR THE PACKAGE'S COPYRIGHT HOLDER\n/;
 
 $po = Locale::XGettext::TT2->new({copyright_holder => 'Copy Left'}, 
-                                 'template.tt')->run->po;
+                                 'templates/template.tt')->run->po;
 like $po->[0]->comment, qr/Copyright \(C\) YEAR Copy Left\n/m;

@@ -1,2 +1,2 @@
-./template.tt
-./additional.tt
+templates/template.tt
+templates/additional.tt

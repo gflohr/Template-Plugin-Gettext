@@ -31,9 +31,9 @@ chdir $test_dir or die "cannot chdir to $test_dir: $!";
 my $sol = '(?:\\A|\\\\n)';
 my $eol = '(?:\\E|\\\\n)';
 
-my $po = Locale::XGettext::TT2->new({}, 'template.tt')->run->po;
+my $po = Locale::XGettext::TT2->new({}, 'templates/template.tt')->run->po;
 like $po->[0]->msgstr, qr/${sol}Report-Msgid-Bugs-To: ${eol}/m;
 
 my $po = Locale::XGettext::TT2->new({msgid_bugs_address => 'bugtracker'}, 
-                                    'template.tt')->run->po;
+                                    'templates/template.tt')->run->po;
 like $po->[0]->msgstr, qr/${sol}Report-Msgid-Bugs-To: bugtracker${eol}/m;

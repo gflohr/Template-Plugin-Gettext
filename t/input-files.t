@@ -32,12 +32,16 @@ my $sep = '(?:"|\\\\n)';
 
 sub find_entries;
 
-my $po = Locale::XGettext::TT2->new({}, 'template.tt', 'additional.tt')->run->po;
+my $po = Locale::XGettext::TT2->new({}, 
+                                    'templates/template.tt', 
+                                    'templates/additional.tt')
+                              ->run->po;
 is((scalar find_entries $po, msgid => qq{"Hello, world!\\n"}), 1);
 is((scalar find_entries $po, msgid => qq{"Hello, Mars!\\n"}), 1);
 is((scalar find_entries $po, msgid => qq{"Hello, extraterrestrials!\\n"}), 0);
 
-$po = Locale::XGettext::TT2->new({files_from => ['POTFILES1']}, 'extra.tt')
+$po = Locale::XGettext::TT2->new({files_from => ['POTFILES1']}, 
+                                  'templates/extra.tt')
                             ->run->po;
 is((scalar find_entries $po, msgid => qq{"Hello, world!\\n"}), 1);
 is((scalar find_entries $po, msgid => qq{"Hello, Mars!\\n"}), 1);
