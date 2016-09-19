@@ -97,7 +97,7 @@ sub __getOptions {
         'j|join-existing' => \$options{join_existing},
         # FIXME! Is this allowed multiple times?
         'x|exclude-file=s' => \$options{exclude_file},
-        'c|add-comments:s' => \$options{add_comments},
+        'c|add-comments:s@' => \$options{add_comments},
         'check=s@' => \$options{check},
         'sentence_end=s' => \$options{sentence_end},
 
