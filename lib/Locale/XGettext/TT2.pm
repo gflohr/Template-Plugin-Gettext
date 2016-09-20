@@ -31,6 +31,8 @@ use Locale::TextDomain qw(Template-Plugin-Gettext);
 use File::Spec;
 use Template;
 use Locale::PO 0.27;
+use Scalar::Util qw(reftype);
+use Locale::Recode;
 
 sub empty {
     my ($what) = @_;
@@ -53,10 +55,8 @@ sub new {
     
     $options->{default_domain} = 'messages' if empty $options->{default_domain};
     $options->{from_code} = 'ASCII' if empty $options->{default_domain};
+    $options->{output_dir} = '.' if empty $options->{output_dir};
 
-    if (!empty $options->{comment_tag}) {
-        $options->{comment_tag} =~ s/^\s+//;
-    }
     if (exists $options->{add_location}) {
         my $option = $options->{add_location};
         if (empty $option) {
@@ -82,6 +82,33 @@ sub new {
         die __x("Sentence end type '{type}' unknown.\n", type => $option)
             if $option ne 'single-space'
                && $option ne 'double-space';
+    }
+    
+    if (exists $options->{add_comments}) {
+    	if (!ref $options->{add_comments} 
+    	    && 'ARRAY' ne $options->{add_comments}) {
+    		die __"Option 'add_comments' must be an array reference.\n";
+    	}
+    	
+    	foreach my $comment (@{$options->{add_comments}}) {
+    		$comment =~ s/^[ \t\n\f\r\013]+//;
+    		$comment = quotemeta $comment;
+    	}
+    }
+    
+    $options->{from_code} = 'ASCII' if empty $options->{from_code};
+
+    my $from_code = $options->{from_code};
+    my $cd = Locale::Recode->new(from => $from_code,
+                                 to => 'utf-8');
+    if ($cd->getError) {    	
+        warn __x("warning: '{from_code}' is not a valid encoding name.  "
+                 . "Using ASCII as fallback.",
+                 from_code => $from_code);
+        $options->{from_code} = 'ASCII';
+    } else {
+    	$options->{from_code} = 
+    	    Locale::Recode->resolveAlias($options->{from_code});
     }
     
     $self->__readFilesFrom($options->{files_from});
@@ -111,6 +138,13 @@ sub run {
         require Carp;
         Carp::croak(__"Attempt to re-run extractor");
     }
+
+    my $from_code = $self->{__options}->{from_code};
+    my $cd;
+    if ($from_code ne 'US-ASCII' && $from_code ne 'UTF-8') {
+    	$cd = Locale::Recode->new(from => $from_code, to => 'utf-8')
+    	   or die $cd->getError;
+    }
     
     my $po = Locale::XGettext::TT2::POEntries->new;
     foreach my $filename (@{$self->{__files}}) {
@@ -122,6 +156,9 @@ sub run {
             foreach my $entry (@$entries) {
             	$self->__addLocation($entry, $filename);
             }
+        }
+        foreach my $entry (@$entries) {
+        	$self->__recodeEntry($entry, $from_code, $cd);
         }
         $po->addEntries($entries);
     }
@@ -136,6 +173,17 @@ sub run {
     $self->{__po} = $po;
     
     return $self;
+}
+
+sub __recodeEntry {
+	my ($self, $entry) = @_;
+	
+	my $from_code = $self->{__options}->{from_code};
+	$from_code = Locale::Recode->resolveAlias($from_code);
+
+warn $from_code;
+	
+	return $self;
 }
 
 sub __resolveFilename {
@@ -195,11 +243,35 @@ sub output {
     
     return if !@{$self->{__po}} && !$self->{__options}->{force_po};
 
-    my $filename = 'messages.po';
-    if (!Locale::PO->save_file_fromarray($filename, $self->{__po})) {
-        die __x("Error writing '{file}': {err}.\n",
-                file => $filename, err => $!);
+    my $options = $self->{__options};
+    my $filename;
+    if (exists $options->{output}) {
+    	if (File::Spec->file_name_is_absolute($options->{output})
+    	    || '-' eq $options->{output}) {
+    	    $filename = $options->{output};	
+    	} else {
+    		$filename = File::Spec->catfile($options->{output_dir},
+    		                                $options->{output})
+    	}
+    } elsif ('-' eq $options->{default_domain}) {
+    	$filename = '-';
+    } else {
+    	$filename = File::Spec->catfile($options->{output_dir}, 
+    	                                $options->{default_domain} . '.po');
     }
+    
+    open my $fh, ">$filename"
+        or die __x("Error writing '{file}': {error}.\n",
+                   file => $filename, error => $!);
+    
+    foreach my $entry (@{$self->{__po}}) {
+    	print $fh $entry->dump
+            or die __x("Error writing '{file}': {error}.\n",
+                       file => $filename, error => $!);
+    }
+    close $fh
+        or die __x("Error writing '{file}': {error}.\n",
+                   file => $filename, error => $!);
     
     return $self;
 }
@@ -278,6 +350,8 @@ sub __getEntriesFromFile {
     });
  
     my $sink;
+    $parser->{__xgettext}->{options} = $self->{__options};
+    
     $tt->process($filename, {}, \$sink) or die $tt->error;
 
     my $entries = $parser->__xgettextEntries;
@@ -431,6 +505,8 @@ sub split_text {
 
     my $entries = Locale::XGettext::TT2::POEntries->new;
     
+    my $options = $self->{__xgettext}->{options};
+    
     my $ident;
     foreach my $chunk (@$chunks) {
          my ($text, $lineno, $tokens) = @$chunk;
@@ -458,6 +534,24 @@ sub split_text {
              next if !$entry;
 
              $entry->{__xgettext_tt_lineno} = $lineno;
+             
+             if ($options->{add_comments} && $text =~ /^#/) {
+             	my @triggers = @{$options->{add_comments}};
+             	foreach my $trigger (@triggers) {
+             		if ($text =~ /^#[ \t\r\f\013]*$trigger/) {
+             			my $comment = '';
+             			my @lines = split /\n/, $text;
+             			foreach my $line (@lines) {
+             				last if $line !~ s/^[ \t\r\f\013]*#[ \t\r\f\013]?//;
+             				
+             			    $comment .= $line . "\n";
+             			}
+             			chomp $comment;
+             			$entry->comment($comment);
+             			last;
+             		}
+             	}
+             }
              
              $entries->add($entry);
          }
