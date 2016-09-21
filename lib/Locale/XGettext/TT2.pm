@@ -405,7 +405,8 @@ EOF
     push @fields, 'Language-Team: LANGUAGE <LL@li.org>';
     push @fields, 'Langauge: ';
     push @fields, 'MIME-Version: ';
-    push @fields, 'Content-Type: text/plain; charset=CHARSET';
+    # We always write utf-8.
+    push @fields, 'Content-Type: text/plain; charset=UTF-8';
     push @fields, 'Content-Transfer-Encoding: 8bit';
     
     $entry->msgstr(join "\n", @fields);	
