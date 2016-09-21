@@ -403,7 +403,7 @@ EOF
     
     push @fields, 'Last-Translator: FULL NAME <EMAIL@ADDRESS>';
     push @fields, 'Language-Team: LANGUAGE <LL@li.org>';
-    push @fields, 'Langauge: ';
+    push @fields, 'Language: ';
     push @fields, 'MIME-Version: ';
     # We always write utf-8.
     push @fields, 'Content-Type: text/plain; charset=UTF-8';
