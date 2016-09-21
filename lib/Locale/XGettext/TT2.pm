@@ -140,6 +140,8 @@ sub run {
     }
 
     my $from_code = $self->{__options}->{from_code};
+    $from_code = Locale::Recode->resolveAlias($from_code);
+    
     my $cd;
     if ($from_code ne 'US-ASCII' && $from_code ne 'UTF-8') {
     	$cd = Locale::Recode->new(from => $from_code, to => 'utf-8')
@@ -158,7 +160,7 @@ sub run {
             }
         }
         foreach my $entry (@$entries) {
-        	$self->__recodeEntry($entry, $from_code, $cd);
+        	$self->__recodeEntry($entry, $from_code, $cd, $path);
         }
         $po->addEntries($entries);
     }
@@ -175,13 +177,89 @@ sub run {
     return $self;
 }
 
-sub __recodeEntry {
-	my ($self, $entry) = @_;
-	
-	my $from_code = $self->{__options}->{from_code};
-	$from_code = Locale::Recode->resolveAlias($from_code);
+sub __conversionError {
+    my ($self, $filename, $lineno, $cd) = @_;
+    
+    die __x("{filename}:{lineno}: {conversion_error}\n",
+            filename => $filename, lineno => $lineno,
+            conversion_error => $cd->getError);
+}
 
-warn $from_code;
+sub __recodeEntry {
+	my ($self, $entry, $from_code, $cd, $filename) = @_;
+	
+    my $toString = sub {
+    	my ($entry) = @_;
+
+        return join '', map { defined $_ ? $_ : '' }
+            $entry->msgid, $entry->msgid_plural, 
+            $entry->msgctxt, $entry->comment;
+    };
+    
+    my $lineno = $entry->{__xgettext_tt_lineno};
+    if ($from_code eq 'US-ASCII') {    	
+    	# Check that everything is 7 bit.
+    	my $flesh = $toString->($entry);
+        if ($flesh !~ /^[\000-\177]*$/) {
+        	die __x("Non-ASCII string at {filename}:{lineno}.\n"
+        	        . "    Please specify the source encoding through "
+        	        . "--from-code.\n",
+        	        filename => $filename,
+        	        lineno => $lineno);
+        }
+    } elsif ($from_code eq 'UTF-8') {
+    	# Check that utf-8 is valid.
+    	require utf8; # [SIC!]
+    	
+        my $flesh = $toString->($entry);
+        if (!utf8::valid($flesh)) {
+        	die __x("{filename}:{lineno}: invalid multibyte sequence\n",
+        	        filename => $filename,
+        	        lineno => $lineno);
+        }
+    } else {
+    	# Convert.
+        my $msgid = Locale::PO->dequote($entry->msgid);
+        if (!empty $msgid) {
+            $cd->recode($msgid) 
+                or $self->__conversionError($filename, $lineno, $cd);
+            $entry->msgid($msgid);
+        }
+        
+        my $msgid_plural = Locale::PO->dequote($entry->msgid_plural);
+        if (!empty $msgid_plural) {
+            $cd->recode($msgid_plural) 
+                or $self->__conversionError($filename, $lineno, $cd);
+            $entry->msgid($msgid_plural);
+        }
+    	
+    	my $msgstr = Locale::PO->dequote($entry->msgstr);
+        if (!empty $msgstr) {
+            $cd->recode($msgstr) 
+                or $self->__conversionError($filename, $lineno, $cd);
+            $entry->msgid($msgstr);
+        }
+        
+        my $msgstr_n = Locale::PO->dequote($entry->msgstr_n);
+        if ($msgstr_n) {
+            my $msgstr_0 = Locale::PO->dequote($msgstr_n->{0});
+            $cd->recode($msgstr_0) 
+                or $self->__conversionError($filename, $lineno, $cd);
+            my $msgstr_1 = Locale::PO->dequote($msgstr_n->{1});
+            $cd->recode($msgstr_1) 
+                or $self->__conversionError($filename, $lineno, $cd);
+            $entry->msgstr_n({
+            	0 => $msgstr_0,
+            	1 => $msgstr_1,
+            })
+        }
+        
+    	my $comment = $entry->comment;
+    	$cd->recode($comment) 
+    	    or $self->__conversionError($filename, $lineno, $cd);
+    	$entry->comment($comment);
+    }
+
 	
 	return $self;
 }
