@@ -53,6 +53,30 @@ sub canKeywords {
     shift;
 }
 
+sub readFile {
+    my ($self, $filename) = @_;
+
+    my %options = (
+        INTERPOLATE => 1,
+        RELATIVE => 1
+    );
+    
+    my $parser = Locale::XGettext::TT2::Parser->new(\%options);
+    
+    my $tt = Template->new({
+        %options,
+        PARSER => $parser,
+    });
+ 
+    my $sink;
+    $parser->{__xgettext} = $self;
+    $parser->{__xgettext_filename} = $filename;
+    
+    $tt->process($filename, {}, \$sink) or die $tt->error;
+
+    return $self;
+}
+
 sub __addLocation {
 	my ($self, $entry, $filename) = @_;
 
@@ -77,31 +101,6 @@ sub __addLocation {
     $entry->reference(join "\n", @lines);
     
     return $self;
-}
-
-sub __getEntriesFromFile {
-	my ($self, $filename) = @_;
-
-    my %options = (
-        INTERPOLATE => 1,
-        RELATIVE => 1
-    );
-    
-    my $parser = Locale::XGettext::TT2::Parser->new(\%options);
-    
-    my $tt = Template->new({
-        %options,
-        PARSER => $parser,
-    });
- 
-    my $sink;
-    $parser->{__xgettext}->{options} = $self->{__options};
-    
-    $tt->process($filename, {}, \$sink) or die $tt->error;
-
-    my $entries = $parser->__xgettextEntries;
-    
-    return $entries;
 }
 
 package Locale::XGettext::TT2::Parser;
@@ -181,9 +180,7 @@ sub split_text {
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
-    my $entries = Locale::XGettext::TT2::POEntries->new;
-    
-    my $options = $self->{__xgettext}->{options};
+    my $options = $self->{__xgettext}->options;
     
     my $ident;
     foreach my $chunk (@$chunks) {
@@ -211,7 +208,7 @@ sub split_text {
              my $entry = extract_args $tokens, 6, $tokens->[5];
              next if !$entry;
 
-             $entry->{__xgettext_tt_lineno} = $lineno;
+             $entry->reference($self->{__xgettext_filename} . ':' . $lineno);
              
              if ($options->{add_comments} && $text =~ /^#/) {
              	my @triggers = @{$options->{add_comments}};
@@ -231,18 +228,12 @@ sub split_text {
              	}
              }
              
-             $entries->add($entry);
+             $self->{__xgettext}->addEntry($entry);
          }
     }
 
-    $self->{__xgettext_entries} = $entries;
-
     # Stop processing here, so that for example includes are ignored.    
     return [];
-}
-
-sub __xgettextEntries {
-	shift->{__xgettext_entries};
 }
 
 1;
