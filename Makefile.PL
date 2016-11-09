@@ -36,10 +36,11 @@ push @extra, 'META_MERGE' => {
 
 WriteMakefile (
     NAME                => 'Template::Plugin::Gettext',
-    VERSION_FROM        => 'lib/Locale/XGettext/TT2.pm',
+    VERSION_FROM        => 'lib/Template/Plugin/Gettext.pm',
     ABSTRACT            => 'Gettext support for the Template Toolkit Version 2',
     AUTHOR              => 'Guido Flohr <guido.flohr@cantanea.com>',
     PREREQ_PM => {
+    	'Locale::XGettext' => '0.1',
         'Locale::TextDomain' => '1.20',
         'Template' => '2.26',
         'Locale::PO' => '0.27',

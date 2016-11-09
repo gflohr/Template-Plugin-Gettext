@@ -22,11 +22,11 @@ use Getopt::Long;
 use Locale::Messages qw(setlocale LC_MESSAGES);
 use Locale::TextDomain qw('Template-Plugin-Gettext');
 
-use Locale::XGettext::TT2::Script;
+use Locale::XGettext::TT2;
 
 Locale::Messages::setlocale(LC_MESSAGES, "");
 
 my %options;
 
-Locale::XGettext::TT2::Script->new(\@ARGV)->run->output;
+Locale::XGettext::TT2->newFromArgv(\@ARGV)->run->output;
 
