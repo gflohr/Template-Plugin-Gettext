@@ -130,10 +130,8 @@ sub split_text {
 
     my $options = $self->{__xgettext}->options;
     my $keywords = $options->{keyword};
-use Data::Dumper;
-warn Dumper $keywords;
 
-    sub extract_args {
+    my $extract_args = sub {
         my ($tokens, $offset, $function) = @_;
 
         return if $offset >= @$tokens;
@@ -181,7 +179,7 @@ warn Dumper $keywords;
         # We ignore excess elements.
 
         return $entry;
-    }
+    };
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
@@ -207,11 +205,25 @@ warn Dumper $keywords;
     
          if ('IDENT' eq $tokens->[0] && $ident eq $tokens->[1]
              && 'DOT' eq $tokens->[2] && 'IDENT' eq $tokens->[4]
-             && exists $functions{$tokens->[5]}) {
-             my $entry = extract_args $tokens, 6, $tokens->[5];
+             && exists $keywords->{$tokens->[5]}) {
+             
+             my $method = $tokens->[5];
+             my $keyword = $keywords->{$method};
+             my @forms = @{$keyword->forms};
+             my %forms = (msgid => $forms[0]);
+             $forms{msgid_plural} = $forms[1] if @forms > 1;
+             if (defined $keyword->context) {
+                 push @forms, $keyword->context;
+                 $forms{msgctxt} = $forms[-1];
+             }
+             @forms = sort { $a <=> $b } @forms;
+             
+             my $entry = $extract_args->($tokens, 6, $tokens->[5]);
              next if !$entry;
 
-             $entry->reference($self->{__xgettext_filename} . ':' . $lineno);
+             my $reference = $self->{__xgettext_filename} . ':' . $lineno;
+             $reference =~ s/-[1-9][0-9]*$//;
+             $entry->reference($reference);
              
              if ($options->{add_comments} && $text =~ /^#/) {
              	my @triggers = @{$options->{add_comments}};
