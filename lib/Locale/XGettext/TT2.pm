@@ -128,63 +128,66 @@ sub split_text {
         c => 'msgctxt',
     );
 
-    my $options = $self->{__xgettext}->options;
-    my $keywords = $options->{keyword};
-
-    my $extract_args = sub {
-        my ($tokens, $offset, $function) = @_;
-
-        return if $offset >= @$tokens;
-        my $schema = $functions{$function};
-
-        return if '(' ne $tokens->[$offset];
-        $offset += 2;
-
-        my $entry = Locale::PO->new;
-        foreach my $type (@$schema) {
-            return if $offset >= @$tokens;
-
-            if ('LITERAL' eq $tokens->[$offset]) {
-                my $string = substr $tokens->[$offset + 1], 1, -1;
-                $string =~ s/\\([\\'])/$1/gs;
-                my $method = $properties{$type};
-                $entry->$method($string);
-                
-                $offset += 2;
-
-                if ($type ne $schema->[-1]) {
-                    return if $offset >= @$tokens;
-                    return if 'COMMA' ne $tokens->[$offset];
-                    $offset += 2;
-                }
-            } elsif ('"' eq $tokens->[$offset]) {
-                $offset += 2;
-                return if $offset >= @$tokens;
-                return if 'TEXT' ne $tokens->[$offset];
-                my $method = $properties{$type};
-                $entry->$method($tokens->[$offset + 1]);
-                
-                $offset += 4;
-            } else {
-                return;
-            }
-        }
-
-        if (defined $entry->msgid_plural && length $entry->msgid_plural) {
-            $entry->msgstr_n({0 => '', 1 => ''});
-        } else {
-            $entry->msgstr('');       	
-        }
-
-        # We ignore excess elements.
-
-        return $entry;
-    };
-
     my $chunks = $self->SUPER::split_text($text) or return;
 
+    my $args = sub {
+    	my (@tokens) = @_;
+    	
+    	return if '(' ne $tokens[0];
+
+        splice @tokens, 0, 2;
+    	
+        my @values;
+        while (@tokens) {
+        	if ('LITERAL' eq $tokens[0]) {
+        		my $string = substr $tokens[1], 1, -1;
+                $string =~ s/\\([\\'])/$1/gs;
+                push @values, $string;
+                splice @tokens, 0, 2;
+        	} elsif ('NUMBER' eq $tokens[0]) {
+        		push @values, $tokens[1];
+        		splice @tokens, 0, 2;
+        	} elsif ('(' eq $tokens[0]) {
+        		splice @tokens, 0, 2;
+        		my $nested = 1;
+        		while (@tokens) {
+        			if ('(' eq $tokens[0]) {
+        				++$nested;
+                        splice @tokens, 0, 2;
+        			} elsif (')' eq $tokens[0]) {
+                        --$nested;
+                        splice @tokens, 0, 2;
+                        if (!$nested) {
+                        	push @values, undef;
+                        	last;
+                        }
+        		    } else {
+        		    	splice @tokens, 0, 2;
+        		    }
+        		}
+        	} else {
+        		return @values;
+        	}
+        	
+        	return @values if !@tokens;
+
+        	my $next = shift @tokens;
+        	if ('COMMA' eq $next) {
+        		shift @tokens;
+        		next;
+        	}
+
+        	return @values;
+        }
+                 	
+    	return @values;
+    };
+    
+    my $options = $self->{__xgettext}->options;
+    my $keywords = $options->{keyword};
+  
     my $ident;
-    foreach my $chunk (@$chunks) {
+    CHUNK: foreach my $chunk (@$chunks) {
          my ($text, $lineno, $tokens) = @$chunk;
 
          next if !ref $tokens;
@@ -217,10 +220,22 @@ sub split_text {
                  $forms{msgctxt} = $forms[-1];
              }
              @forms = sort { $a <=> $b } @forms;
-             
-             my $entry = $extract_args->($tokens, 6, $tokens->[5]);
-             next if !$entry;
 
+             my @args = $args->(@$tokens[6 .. $#$tokens]);
+             
+             # Do we have enough arguments?
+             next if $forms[-1] - 1 > $#args;
+             
+             my $entry = Locale::PO->new;
+             foreach my $method (keys %forms) {
+                 my $argno = $forms{$method} - 1;
+                 
+                 # We are only interested in literal values.  Whatever is
+                 # undefined is not parsable or not valid.
+                 next CHUNK if !defined $args[$argno];
+                 $entry->$method($args[$argno]);
+             }
+             
              my $reference = $self->{__xgettext_filename} . ':' . $lineno;
              $reference =~ s/-[1-9][0-9]*$//;
              $entry->reference($reference);
