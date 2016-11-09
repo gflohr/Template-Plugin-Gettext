@@ -25,6 +25,34 @@ use strict;
 use Locale::TextDomain qw(Template-Plugin-Gettext);
 use Template;
 
+use base qw(Locale::XGettext);
+
+sub versionInformation {
+    return __x('{program} (Template-Plugin-Gettext) {version}
+Copyright (C) {years} Cantanea EOOD (http://www.cantanea.com/).
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Written by Guido Flohr (http://www.guido-flohr.net/).
+',
+    program => $0, years => 2016, version => $Locale::XGettext::VERSION);
+}
+
+sub fileInformation {
+    return __(<<EOF);
+Input files are interpreted as plain text files with each paragraph being
+a separately translatable unit.  
+EOF
+}
+
+sub canExtractAll {
+    shift;
+}
+
+sub canKeywords {
+    shift;
+}
+
 sub __addLocation {
 	my ($self, $entry, $filename) = @_;
 
