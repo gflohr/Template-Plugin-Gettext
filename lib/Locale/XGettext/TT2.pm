@@ -128,6 +128,11 @@ sub split_text {
         c => 'msgctxt',
     );
 
+    my $options = $self->{__xgettext}->options;
+    my $keywords = $options->{keyword};
+use Data::Dumper;
+warn Dumper $keywords;
+
     sub extract_args {
         my ($tokens, $offset, $function) = @_;
 
@@ -180,8 +185,6 @@ sub split_text {
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
-    my $options = $self->{__xgettext}->options;
-    
     my $ident;
     foreach my $chunk (@$chunks) {
          my ($text, $lineno, $tokens) = @$chunk;
