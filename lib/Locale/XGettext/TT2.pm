@@ -144,6 +144,9 @@ sub split_text {
                 $string =~ s/\\([\\'])/$1/gs;
                 push @values, $string;
                 splice @tokens, 0, 2;
+        	} elsif ('"' eq $tokens[0]) {
+        		push @values, $tokens[3];
+        		splice @tokens, 0, 6;
         	} elsif ('NUMBER' eq $tokens[0]) {
         		push @values, $tokens[1];
         		splice @tokens, 0, 2;
