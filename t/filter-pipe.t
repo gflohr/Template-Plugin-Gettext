@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 
 use Template;
 
@@ -152,6 +152,22 @@ $output = '';
 $template = <<'EOF';
 [%- USE Gettext -%]
 [%- 'Context' | npxgettext('one file', '{count} files', 42, count => 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, '42 files';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | nxgettextp('{count} files', 1, 'Context', count => 1) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'one file';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | nxgettextp('{count} files', 42, 'Context', count => 42) -%]
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, '42 files';
