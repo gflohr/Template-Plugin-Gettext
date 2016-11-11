@@ -134,6 +134,15 @@ sub new {
             return __nxgettext($textdomain, shift, @args);
         };
     }, 1);
+    $ctx->define_filter(pxgettext => sub {
+        my ($context, @args) = @_;
+        my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+
+        push @args, %$pairs;
+        return sub {
+            return __pxgettext($textdomain, shift, @args);
+        };
+    }, 1);
 
     return $self;
 }
@@ -269,6 +278,26 @@ sub nxgettext {
     push @args, %$pairs;
 
     return __nxgettext $self->{__textdomain}, $msgid, @args;
+}
+
+sub __pxgettext {
+    my ($textdomain, $context, $msgid, %vars) = @_;
+
+    __find_domain $textdomain
+        if defined $textdomain && exists $bound_dirs{$textdomain};
+
+    return __expand((Locale::Messages::dpgettext($textdomain => $context, 
+                                                 $msgid)), 
+                    %vars);
+}
+
+sub pxgettext {
+    my ($self, $context, @args) = @_;
+ 
+    my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+    push @args, %$pairs;
+
+    return __pxgettext $self->{__textdomain}, $context, @args;
 }
 
 sub __expand($%) {

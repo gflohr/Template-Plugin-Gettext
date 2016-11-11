@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 use Template;
 
@@ -123,3 +123,11 @@ $template = <<'EOF';
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, '42 files';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | pxgettext('Hello, world!', who => 'world') -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'Hello, world!';
