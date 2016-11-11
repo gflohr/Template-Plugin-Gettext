@@ -71,6 +71,15 @@ sub new {
             return __gettext($textdomain, shift);
         };
     }, 1);
+    $ctx->define_filter(ngettext => sub {
+        my ($context, @args) = @_;
+        my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+
+        push @args, %$pairs;
+        return sub {
+            return __ngettext($textdomain, shift, @args);
+        };
+    }, 1);
     $ctx->define_filter(xgettext => sub {
         my ($context, @args) = @_;
         my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
@@ -99,7 +108,23 @@ sub gettext {
     return __gettext $self->{__textdomain}, $msgid;
 }
 
-sub __xgettext {
+sub __ngettext {
+    my ($textdomain, $msgid, $msgid_plural, $count) = @_;
+
+    __find_domain $textdomain
+        if defined $textdomain && exists $bound_dirs{$textdomain};
+
+    return Locale::Messages::dngettext($textdomain => $msgid, $msgid_plural,
+                                       $count);
+}
+
+sub ngettext {
+    my ($self, $msgid, $msgid_plural, $count) = @_;
+
+    return __ngettext $self->{__textdomain}, $msgid, $msgid_plural, $count
+}
+
+sub __xgettext($$;%) {
     my ($textdomain, $msgid, %vars) = @_;
 
     __find_domain $textdomain
