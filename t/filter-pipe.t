@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 use Template;
 
@@ -67,3 +67,19 @@ $template = <<'EOF';
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'Hello, world!';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | npgettext('one file', 'many files', 1) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'one file';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | npgettext('one file', 'many files', 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'many files';
