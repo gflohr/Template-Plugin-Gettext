@@ -53,6 +53,19 @@ sub canKeywords {
     shift;
 }
 
+sub defaultKeywords {
+    return (
+        gettext => [1],
+        ngettext => [1, 2],
+        pgettext => ['1c', 2],
+        npgettext => ['1c', 2, 3],
+        xgettext => [1],
+        nxgettext => [1, 2],
+        pxgettext => ['1c', 2],
+        npxgettext => ['1c', 2, 3],
+    );
+}
+
 sub readFile {
     my ($self, $filename) = @_;
 
