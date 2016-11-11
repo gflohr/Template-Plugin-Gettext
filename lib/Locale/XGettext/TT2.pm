@@ -77,32 +77,6 @@ sub readFile {
     return $self;
 }
 
-sub __addLocation {
-	my ($self, $entry, $filename) = @_;
-
-    my $new_ref = "$filename:$entry->{__xgettext_tt_lineno}";
-    
-    my $reference = $entry->reference;
-    my @lines = split "\n", $reference;
-    if (!@lines) {
-    	push @lines, $new_ref;
-    } else {
-    	my $last_line = $lines[-1];
-    	my $ref_length = 1 + length $new_ref;
-    	if ($ref_length > 76) {
-    		push @lines, $new_ref;
-    	} elsif ($ref_length + length $last_line > 76) {
-    		push @lines, $new_ref;
-    	} else {
-    		$lines[-1] .= ' ' . $new_ref;
-    	}
-    }
-    
-    $entry->reference(join "\n", @lines);
-    
-    return $self;
-}
-
 package Locale::XGettext::TT2::Parser;
 
 use base qw(Template::Parser);
@@ -111,22 +85,6 @@ use strict;
 
 sub split_text {
     my ($self, $text) = @_;
-
-    my %functions = (
-        gettext => [qw(s)],
-        ngettext => [qw(s p)],
-        pgettext => [qw(c s)],
-        npgettext => [qw(c s p)],
-        xgettext => [qw(s)],
-        nxgettext => [qw(s p)],
-        pxgettext => [qw(c s)],
-        npxgettext => [qw(c s p)],
-    );
-    my %properties = (
-        s => 'msgid',
-        p => 'msgid_plural',
-        c => 'msgctxt',
-    );
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
