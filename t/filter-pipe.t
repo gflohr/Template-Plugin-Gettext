@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 
 use Template;
 
@@ -139,3 +139,19 @@ $template = <<'EOF';
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'Hello, world!';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | npxgettext('one file', '{count} files', 1, count => 1) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'one file';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | npxgettext('one file', '{count} files', 42, count => 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, '42 files';
