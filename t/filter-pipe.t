@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 7;
+use Test::More tests => 10;
 
 use Template;
 
@@ -63,7 +63,15 @@ is $output, 'many files';
 $output = '';
 $template = <<'EOF';
 [%- USE Gettext -%]
-[%- 'Context' | pgettext('Hello, world!', 42) -%]
+[%- 'Context' | pgettext('Hello, world!') -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'Hello, world!';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Hello, world!' | gettextp('Context') -%]
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'Hello, world!';
@@ -80,6 +88,22 @@ $output = '';
 $template = <<'EOF';
 [%- USE Gettext -%]
 [%- 'Context' | npgettext('one file', 'many files', 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'many files';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | ngettextp('many files', 1, 'Context') -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'one file';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | ngettextp('many files', 42, 'Context') -%]
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'many files';

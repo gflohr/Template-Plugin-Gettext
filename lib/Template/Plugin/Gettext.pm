@@ -89,6 +89,15 @@ sub new {
             return __pgettext($textdomain, shift, @args);
         };
     }, 1);
+    $ctx->define_filter(gettextp => sub {
+        my ($context, @args) = @_;
+        my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+
+        push @args, %$pairs;
+        return sub {
+            return __gettextp($textdomain, shift, @args);
+        };
+    }, 1);
     $ctx->define_filter(npgettext => sub {
         my ($context, @args) = @_;
         my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
@@ -96,6 +105,15 @@ sub new {
         push @args, %$pairs;
         return sub {
             return __npgettext($textdomain, shift, @args);
+        };
+    }, 1);
+    $ctx->define_filter(ngettextp => sub {
+        my ($context, @args) = @_;
+        my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+
+        push @args, %$pairs;
+        return sub {
+            return __ngettextp($textdomain, shift, @args);
         };
     }, 1);
     $ctx->define_filter(xgettext => sub {
@@ -157,6 +175,21 @@ sub pgettext {
     return __pgettext $self->{__textdomain}, $context, $msgid;
 }
 
+sub __gettextp {
+    my ($textdomain, $msgid, $context) = @_;
+
+    __find_domain $textdomain
+        if defined $textdomain && exists $bound_dirs{$textdomain};
+
+    return Locale::Messages::dpgettext($textdomain => $context, $msgid);
+}
+
+sub gettextp {
+    my ($self, $msgid, $context) = @_;
+
+    return __gettextp $self->{__textdomain}, $msgid, $context;
+}
+
 sub __npgettext {
     my ($textdomain, $context, $msgid, $msgid_plural, $count) = @_;
 
@@ -172,6 +205,23 @@ sub npgettext {
 
     return __npgettext $self->{__textdomain}, $context, $msgid, $msgid_plural,
                        $count;
+}
+
+sub __ngettextp {
+    my ($textdomain, $msgid, $msgid_plural, $count, $context) = @_;
+
+    __find_domain $textdomain
+        if defined $textdomain && exists $bound_dirs{$textdomain};
+
+    return Locale::Messages::dnpgettext($textdomain => $context, $msgid,
+                                        $msgid_plural, $count);
+}
+
+sub ngettextp {
+    my ($self, $msgid, $msgid_plural, $count, $context) = @_;
+
+    return __ngettextp $self->{__textdomain}, $msgid, $msgid_plural, $count,
+                       $context;
 }
 
 sub __xgettext($$;%) {
