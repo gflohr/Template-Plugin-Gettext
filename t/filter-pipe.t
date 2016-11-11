@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use Template;
 
@@ -59,3 +59,11 @@ $template = <<'EOF';
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'many files';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Context' | pgettext('Hello, world!', 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'Hello, world!';
