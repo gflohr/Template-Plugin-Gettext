@@ -47,10 +47,6 @@ BEGIN {
     }
 }
 
-sub myfunc {
-        return 'it works';
-}
-
 sub new {
     my ($class, $ctx, $textdomain, $language, $charset, @search_dirs) = @_;
 
@@ -65,6 +61,8 @@ sub new {
     }
 
     web_set_locale $language, $charset if defined $language;
+
+    $self->{__textdomain} = $textdomain;
 
     $ctx->define_filter(gettext => sub {
         my ($context) = @_;
@@ -95,6 +93,12 @@ sub __gettext {
     return Locale::Messages::dgettext($textdomain => $msgid);
 }
 
+sub gettext {
+    my ($self, $msgid) = @_;
+
+    return __gettext $self->{__textdomain}, $msgid;
+}
+
 sub __xgettext {
     my ($textdomain, $msgid, %vars) = @_;
 
@@ -102,6 +106,15 @@ sub __xgettext {
         if defined $textdomain && exists $bound_dirs{$textdomain};
 
     return __expand((Locale::Messages::dgettext($textdomain => $msgid)), %vars);
+}
+
+sub xgettext {
+    my ($self, $msgid, @args) = @_;
+ 
+    my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+    push @args, %$pairs;
+
+    return __xgettext $self->{__textdomain}, $msgid, @args;
 }
 
 sub __expand($%) {
