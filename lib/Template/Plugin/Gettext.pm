@@ -125,6 +125,15 @@ sub new {
             return __xgettext($textdomain, shift, @args);
         };
     }, 1);
+    $ctx->define_filter(nxgettext => sub {
+        my ($context, @args) = @_;
+        my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+
+        push @args, %$pairs;
+        return sub {
+            return __nxgettext($textdomain, shift, @args);
+        };
+    }, 1);
 
     return $self;
 }
@@ -224,7 +233,7 @@ sub ngettextp {
                        $context;
 }
 
-sub __xgettext($$;%) {
+sub __xgettext {
     my ($textdomain, $msgid, %vars) = @_;
 
     __find_domain $textdomain
@@ -240,6 +249,26 @@ sub xgettext {
     push @args, %$pairs;
 
     return __xgettext $self->{__textdomain}, $msgid, @args;
+}
+
+sub __nxgettext {
+    my ($textdomain, $msgid, $msgid_plural, $count, %vars) = @_;
+
+    __find_domain $textdomain
+        if defined $textdomain && exists $bound_dirs{$textdomain};
+
+    return __expand((Locale::Messages::dngettext($textdomain => $msgid,
+                                                 $msgid_plural, $count)), 
+                    %vars);
+}
+
+sub nxgettext {
+    my ($self, $msgid, $msgid_plural, $count, @args) = @_;
+ 
+    my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
+    push @args, %$pairs;
+
+    return __nxgettext $self->{__textdomain}, $msgid, @args;
 }
 
 sub __expand($%) {

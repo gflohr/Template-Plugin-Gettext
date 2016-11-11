@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 10;
+use Test::More tests => 12;
 
 use Template;
 
@@ -32,14 +32,6 @@ $output = '';
 $template = <<'EOF';
 [%- USE Gettext -%]
 [%- 'Hello, world!' | gettext -%]
-EOF
-$tt->process(\$template, {}, \$output) or die $tt->error;
-is $output, 'Hello, world!';
-
-$output = '';
-$template = <<'EOF';
-[%- USE Gettext -%]
-[%- 'Hello, {who}!' | xgettext(who => 'world') -%]
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'Hello, world!';
@@ -107,3 +99,27 @@ $template = <<'EOF';
 EOF
 $tt->process(\$template, {}, \$output) or die $tt->error;
 is $output, 'many files';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'Hello, {who}!' | xgettext(who => 'world') -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'Hello, world!';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | nxgettext('{count} files', 1, count => 1) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, 'one file';
+
+$output = '';
+$template = <<'EOF';
+[%- USE Gettext -%]
+[%- 'one file' | nxgettext('{count} files', 42, count => 42) -%]
+EOF
+$tt->process(\$template, {}, \$output) or die $tt->error;
+is $output, '42 files';
