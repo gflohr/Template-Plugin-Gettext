@@ -58,11 +58,15 @@ sub defaultKeywords {
         gettext => [1],
         ngettext => [1, 2],
         pgettext => ['1c', 2],
+        gettextp => [1, '2c'],
         npgettext => ['1c', 2, 3],
+        ngettextp => [1, 2, '3c'],
         xgettext => [1],
         nxgettext => [1, 2],
         pxgettext => ['1c', 2],
+        xgettextp => [1, '2c'],
         npxgettext => ['1c', 2, 3],
+        nxgettextp => [1, 2, '3c'],
     );
 }
 
