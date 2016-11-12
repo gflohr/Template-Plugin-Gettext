@@ -300,11 +300,12 @@ sub __nxgettext {
 
 sub nxgettext {
     my ($self, $msgid, $msgid_plural, $count, @args) = @_;
- 
+
     my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
     push @args, %$pairs;
 
-    return __nxgettext $self->{__textdomain}, $msgid, @args;
+    return __nxgettext $self->{__textdomain}, $msgid, $msgid_plural, $count, 
+                       @args;
 }
 
 sub __pxgettext {
@@ -344,7 +345,7 @@ sub xgettextp {
     my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
     push @args, %$pairs;
 
-    return __pxgettext $self->{__textdomain}, $msgid, @args;
+    return __xgettextp $self->{__textdomain}, $msgid, @args;
 }
 
 sub __npxgettext {
@@ -386,7 +387,7 @@ sub nxgettextp {
     my $pairs = ref $args[-1] eq 'HASH' ? pop(@args) : {};
     push @args, %$pairs;
 
-    return __npxgettext $self->{__textdomain}, $msgid, @args;
+    return __nxgettextp $self->{__textdomain}, $msgid, @args;
 }
 
 sub __expand($%) {
