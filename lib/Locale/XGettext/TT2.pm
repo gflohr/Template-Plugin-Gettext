@@ -94,6 +94,13 @@ sub readFile {
     return $self;
 }
 
+sub getLanguageSpecificOptions {
+	my ($self) = @_;
+	
+	return ['interpolate', 'interpolate', '--interpolate',
+	        __("check for illegal variable interpolations")];
+}
+
 package Locale::XGettext::TT2::Parser;
 
 use base qw(Template::Parser);
