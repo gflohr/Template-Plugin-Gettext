@@ -3,3 +3,9 @@
 
 [% # TRANSLATORS: A translator comment.
    gtx.gettext("Translator comment above.\n") %]
+
+[% gtx.pxgettext("method", "Hello, {name}!", name => "N. N.") %]
+
+[% FILTER xgettextp("filter", who => 'world') %]
+Hello, {who}!
+[% END %]

@@ -35,6 +35,7 @@ sub find_entries {
     foreach my $entry (@$po) {
         next if exists $args{msgid} && $entry->msgid ne $args{msgid};
         next if exists $args{msgstr} && $entry->msgstr ne $args{msgstr};
+        next if exists $args{msgctxt} && $entry->msgctxt ne $args{msgctxt};
         next if exists $args{comment} && $entry->comment ne $args{comment};
         push @hits, $entry;
     }
