@@ -9,3 +9,5 @@
 [% FILTER xgettextp("filter", who => 'world') %]
 Hello, {who}!
 [% END %]
+
+[% "Hello, {arg}!" | xgettextp("pipe", arg => 'world') %]

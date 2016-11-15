@@ -20,7 +20,7 @@
 
 use strict;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 use Locale::XGettext::TT2;
 
@@ -39,3 +39,6 @@ my @po = Locale::XGettext::TT2->new({},
 is((scalar find_entries \@po, 
                msgid => qq{"Hello, {who}!"},
                msgctxt => qq{"filter"}), 1);
+is((scalar find_entries \@po, 
+               msgid => qq{"Hello, {arg}!"},
+               msgctxt => qq{"pipe"}), 1);

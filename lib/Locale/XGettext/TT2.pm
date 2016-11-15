@@ -139,13 +139,26 @@ sub split_text {
                 if ('FILTER' eq $tokens->[$i]
                     && 'IDENT' eq $tokens->[$i + 2]
                     && exists $keywords->{$tokens->[$i + 3]}
-                    && '(' eq $tokens->[$i + 4]
-                    && @$chunks
-                    && 'ITEXT' eq $chunks->[0]->[2]) {
+                    && '(' eq $tokens->[$i + 4]) {
+                    my @tokens;
                     my $keyword = $keywords->{$tokens->[$i + 3]};
                     # Inject the block contents as the first argument.
-                    my $first_arg = $chunks->[0]->[0];
-                    splice @$tokens, 6, 0, 'LITERAL', $first_arg, 'COMMA', ',';
+                    if ($i) {
+                    	my $first_arg;
+                    	if ($tokens->[$i - 2] eq 'LITERAL') {
+                            $first_arg = $tokens->[$i - 1];
+                    	} else {
+                    		next;
+                    	}
+                        splice @$tokens, 6 + $i, 0, 
+                               'LITERAL', $first_arg, 'COMMA', ',';
+                    } else {
+                    	next if !@$chunks;
+                    	next if $chunks->[0]->[2] ne 'ITEXT';
+                        my $first_arg = $chunks->[0]->[0];
+                        splice @$tokens, 6, 0, 
+                               'LITERAL', $first_arg, 'COMMA', ',';
+                    }
                     $self->__extractEntry($text, $lineno, $keyword,
                                           @$tokens[$i + 4 .. $#$tokens]);
                 }
