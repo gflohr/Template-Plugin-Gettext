@@ -109,37 +109,48 @@ sub split_text {
     my $keywords = $options->{keyword};
   
     my $ident;
-    CHUNK: foreach my $chunk (@$chunks) {
-         my ($text, $lineno, $tokens) = @$chunk;
+    while (my $chunk = shift @$chunks) {
+        my ($text, $lineno, $tokens) = @$chunk;
 
-         next if !ref $tokens;
+        next if !ref $tokens;
 
-         if ('USE' eq $tokens->[0] && 'IDENT' eq $tokens->[2]) {
-             if ('Gettext' eq $tokens->[3]
-                 && (4 == @$tokens
-                     || '(' eq $tokens->[4])) {
-                 $ident = 'Gettext';
-             } elsif ('ASSIGN' eq $tokens->[4] && 'IDENT' eq $tokens->[6]
-                      && 'Gettext' eq $tokens->[7]) {
-                 $ident = $tokens->[3];
-             }
-             next;
-         }
+        if ('USE' eq $tokens->[0] && 'IDENT' eq $tokens->[2]) {
+            if ('Gettext' eq $tokens->[3]
+                && (4 == @$tokens
+                    || '(' eq $tokens->[4])) {
+                $ident = 'Gettext';
+            } elsif ('ASSIGN' eq $tokens->[4] && 'IDENT' eq $tokens->[6]
+                     && 'Gettext' eq $tokens->[7]) {
+                $ident = $tokens->[3];
+            }
+            next;
+        }
 
-         next if !defined $ident;
-    
-         if ('IDENT' eq $tokens->[0] && $ident eq $tokens->[1]
-             && 'DOT' eq $tokens->[2] && 'IDENT' eq $tokens->[4]
-             && exists $keywords->{$tokens->[5]}) {
-              my $keyword = $keywords->{$tokens->[5]};
-              $self->__extractEntry($text, $lineno, $keyword, 
-                                    @$tokens[6 .. $#$tokens]);
-#         } elsif ('FILTER' eq $tokens->[0]
-#             && 'IDENT' eq $tokens->[2]
-#             && exists $keywords->{$tokens->[3]}) {
-#             use Data::Dumper;
-#             warn Dumper $tokens;         	
-         }
+        next if !defined $ident;
+
+        if ('IDENT' eq $tokens->[0] && $ident eq $tokens->[1]
+            && 'DOT' eq $tokens->[2] && 'IDENT' eq $tokens->[4]
+            && exists $keywords->{$tokens->[5]}) {
+            my $keyword = $keywords->{$tokens->[5]};
+            $self->__extractEntry($text, $lineno, $keyword, 
+                                  @$tokens[6 .. $#$tokens]);
+        } else {
+            for (my $i = 0; $i < @$tokens; $i += 2) {
+                if ('FILTER' eq $tokens->[$i]
+                    && 'IDENT' eq $tokens->[$i + 2]
+                    && exists $keywords->{$tokens->[$i + 3]}
+                    && '(' eq $tokens->[$i + 4]
+                    && @$chunks
+                    && 'ITEXT' eq $chunks->[0]->[2]) {
+                    my $keyword = $keywords->{$tokens->[$i + 3]};
+                    # Inject the block contents as the first argument.
+                    my $first_arg = $chunks->[0]->[0];
+                    splice @$tokens, 6, 0, 'LITERAL', $first_arg, 'COMMA', ',';
+                    $self->__extractEntry($text, $lineno, $keyword,
+                                          @$tokens[$i + 4 .. $#$tokens]);
+                }
+            }
+        }
     }
 
     # Stop processing here, so that for example includes are ignored.    
@@ -169,6 +180,11 @@ sub __extractEntry {
             } elsif ('NUMBER' eq $tokens[0]) {
                 push @values, $tokens[1];
                 splice @tokens, 0, 2;
+            } elsif ('IDENT' eq $tokens[0]) {
+            	# We store undef as the value because we cannot use it
+            	# anyway.
+            	push @values, undef;
+            	splice @tokens, 0, 2;
             } elsif ('(' eq $tokens[0]) {
                 splice @tokens, 0, 2;
                 my $nested = 1;
@@ -196,6 +212,9 @@ sub __extractEntry {
             my $next = shift @tokens;
             if ('COMMA' eq $next) {
                 shift @tokens;
+                next;
+            } elsif ('ASSIGN' eq $next && '=>' eq $tokens[0]) {
+            	shift @tokens;
                 next;
             }
 

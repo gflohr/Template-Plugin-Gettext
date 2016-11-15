@@ -37,5 +37,5 @@ my @po = Locale::XGettext::TT2->new({},
                                     'templates/template.tt')
                               ->run->po;
 is((scalar find_entries \@po, 
-               msgid => qq{"\\nHello, {who}!\\n"},
+               msgid => qq{"Hello, {who}!"},
                msgctxt => qq{"filter"}), 1);
