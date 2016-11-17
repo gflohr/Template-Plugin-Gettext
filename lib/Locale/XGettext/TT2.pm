@@ -74,9 +74,12 @@ sub readFile {
     my ($self, $filename) = @_;
 
     my %options = (
-        INTERPOLATE => 1,
         RELATIVE => 1
     );
+
+    if ($self->options->{interpolate}) {
+    	$options{INTERPOLATE} = 1;
+    }
     
     my $parser = Locale::XGettext::TT2::Parser->new(\%options);
     
@@ -117,6 +120,11 @@ sub split_text {
   
     my $ident;
     while (my $chunk = shift @$chunks) {
+    	if (!ref $chunk) {
+    		shift @$chunks;
+    		next;
+    	}
+    	
         my ($text, $lineno, $tokens) = @$chunk;
 
         next if !ref $tokens;
@@ -161,8 +169,15 @@ sub split_text {
                                'LITERAL', $first_arg, 'COMMA', ',';
                     } else {
                     	next if !@$chunks;
-                    	next if $chunks->[0]->[2] ne 'ITEXT';
-                        my $first_arg = $chunks->[0]->[0];
+                    	my $first_arg;
+                    	if (ref $chunks->[0]) {
+                    	    next if $chunks->[0]->[2] ne 'ITEXT';
+                            $first_arg = $chunks->[0]->[0];
+                    	} elsif ('TEXT' eq $chunks->[0]) {
+                    		$first_arg = $chunks->[1];
+                    	} else {
+                    		next;
+                    	}
                         splice @$tokens, 6, 0, 
                                'LITERAL', $first_arg, 'COMMA', ',';
                     }
