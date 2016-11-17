@@ -54,9 +54,13 @@ WriteMakefile (
 
 sub MY::postamble {
    	q ( 
-all :: ReleaseNotes
+all :: ReleaseNotes lib/Template/Plugin/Gettext.md
 
 ReleaseNotes: NEWS
 	cat NEWS >$@
+
+%.md:%.pm
+	perl -MPod::Markdown -e 'Pod::Markdown->new->filter(@ARGV)' $< >$@ 
+
 	);
 }
