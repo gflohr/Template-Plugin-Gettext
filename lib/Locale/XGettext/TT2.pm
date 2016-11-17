@@ -106,9 +106,11 @@ sub getLanguageSpecificOptions {
 
 package Locale::XGettext::TT2::Parser;
 
-use base qw(Template::Parser);
-
 use strict;
+
+use Locale::TextDomain qw(Template-Plugin-Gettext);
+
+use base qw(Template::Parser);
 
 sub split_text {
     my ($self, $text) = @_;
@@ -117,7 +119,7 @@ sub split_text {
 
     my $options = $self->{__xgettext}->options;
     my $keywords = $options->{keyword};
-  
+    
     my $ident;
     while (my $chunk = shift @$chunks) {
     	if (!ref $chunk) {
@@ -210,8 +212,14 @@ sub __extractEntry {
                 push @values, $string;
                 splice @tokens, 0, 2;
             } elsif ('"' eq $tokens[0]) {
-                push @values, $tokens[3];
-                splice @tokens, 0, 6;
+            	# String containing interpolated variables.
+            	my $msg = __"Illegal variable interpolation!";
+            	push @values, \$msg;
+            	while (@tokens) {
+                    last if 'COMMA' eq $tokens[0];
+                    last if ')' eq $tokens[0];     
+                    shift @tokens;     		
+            	}
             } elsif ('NUMBER' eq $tokens[0]) {
                 push @values, $tokens[1];
                 splice @tokens, 0, 2;
@@ -280,6 +288,7 @@ sub __extractEntry {
         # We are only interested in literal values.  Whatever is
         # undefined is not parsable or not valid.
         return if !defined $args[$argno];
+        die ${$args[$argno]} if ref $args[$argno];
         $entry->$method($args[$argno]);
     }
              
