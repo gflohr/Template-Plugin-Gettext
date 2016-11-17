@@ -77,10 +77,6 @@ sub readFile {
         RELATIVE => 1
     );
 
-    if ($self->options->{interpolate}) {
-    	$options{INTERPOLATE} = 1;
-    }
-    
     my $parser = Locale::XGettext::TT2::Parser->new(\%options);
     
     my $tt = Template->new({
@@ -95,13 +91,6 @@ sub readFile {
     $tt->process($filename, {}, \$sink) or die $tt->error;
 
     return $self;
-}
-
-sub getLanguageSpecificOptions {
-	my ($self) = @_;
-	
-	return ['interpolate', 'interpolate', '--interpolate',
-	        __("check for illegal variable interpolations")];
 }
 
 package Locale::XGettext::TT2::Parser;
