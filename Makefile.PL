@@ -54,7 +54,7 @@ WriteMakefile (
 
 sub MY::postamble {
    	q ( 
-all :: ReleaseNotes lib/Template/Plugin/Gettext.md
+all :: ReleaseNotes lib/Template/Plugin/Gettext.md lib/Locale/XGettext/TT2.md
 
 ReleaseNotes: NEWS
 	cat NEWS >$@
