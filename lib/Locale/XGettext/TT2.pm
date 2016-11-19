@@ -201,13 +201,21 @@ sub __extractEntry {
                 push @values, $string;
                 splice @tokens, 0, 2;
             } elsif ('"' eq $tokens[0]) {
-            	# String containing interpolated variables.
-            	my $msg = __"Illegal variable interpolation!";
-            	push @values, \$msg;
-            	while (@tokens) {
-                    last if 'COMMA' eq $tokens[0];
-                    last if ')' eq $tokens[0];     
-                    shift @tokens;     		
+            	if ('TEXT' eq $tokens[2]
+            	    && '"' eq $tokens[4]
+            	    && ('COMMA' eq $tokens[6]
+            	        || ')' eq $tokens[6])) {
+            	    push @values, $tokens[3];
+            	    splice @tokens, 6;	
+            	} else {
+              	    # String containing interpolated variables.
+            	    my $msg = __"Illegal variable interpolation!";
+            	    push @values, \$msg;
+            	    while (@tokens) {
+                        last if 'COMMA' eq $tokens[0];
+                        last if ')' eq $tokens[0];     
+                        shift @tokens;     		
+            	    }
             	}
             } elsif ('NUMBER' eq $tokens[0]) {
                 push @values, $tokens[1];
@@ -277,7 +285,7 @@ sub __extractEntry {
         # We are only interested in literal values.  Whatever is
         # undefined is not parsable or not valid.
         return if !defined $args[$argno];
-        die ${$args[$argno]} if ref $args[$argno];
+        die "${$args[$argno]}\n" if ref $args[$argno];
         $entry->$method($args[$argno]);
     }
              
