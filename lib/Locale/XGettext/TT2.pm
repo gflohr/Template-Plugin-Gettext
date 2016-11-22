@@ -209,7 +209,7 @@ sub __extractEntry {
             	    splice @tokens, 6;	
             	} else {
               	    # String containing interpolated variables.
-            	    my $msg = __"Illegal variable interpolation!";
+            	    my $msg = __"Illegal variable interpolation at \"\$\"!";
             	    push @values, \$msg;
             	    while (@tokens) {
                         last if 'COMMA' eq $tokens[0];
@@ -285,7 +285,10 @@ sub __extractEntry {
         # We are only interested in literal values.  Whatever is
         # undefined is not parsable or not valid.
         return if !defined $args[$argno];
-        die "${$args[$argno]}\n" if ref $args[$argno];
+        if (ref $args[$argno]) {
+        	my $filename = $self->{__xgettext_filename};
+            die "$filename:$lineno: ${$args[$argno]}\n" if ref $args[$argno];
+        }
         $entry->$method($args[$argno]);
     }
              
@@ -306,7 +309,7 @@ sub __extractEntry {
                     $comment .= $line . "\n";
                 }
                 chomp $comment;
-                $entry->comment($comment);
+                $entry->automatic($comment);
                 last;
             }
         }

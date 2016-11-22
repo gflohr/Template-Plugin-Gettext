@@ -37,6 +37,7 @@ sub find_entries {
         next if exists $args{msgstr} && $entry->msgstr ne $args{msgstr};
         next if exists $args{msgctxt} && $entry->msgctxt ne $args{msgctxt};
         next if exists $args{comment} && $entry->comment ne $args{comment};
+        next if exists $args{automatic} && $entry->automatic ne $args{automatic};
         push @hits, $entry;
     }
 
