@@ -106,8 +106,7 @@ sub split_text {
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
-    my $options = $self->{__xgettext}->options;
-    my $keywords = $options->{keyword};
+    my $keywords = $self->{__xgettext}->getOption('keyword');
     
     my $ident;
     while (my $chunk = shift @$chunks) {
