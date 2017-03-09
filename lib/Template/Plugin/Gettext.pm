@@ -45,6 +45,7 @@ BEGIN {
             last;
         }
     }
+    Locale::Messages->select_package('gettext_pp');
 }
 
 sub new {
