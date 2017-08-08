@@ -54,7 +54,7 @@ sub canKeywords {
 }
 
 sub defaultKeywords {
-    return (
+    return [ 
         gettext => [1],
         ngettext => [1, 2],
         pgettext => ['1c', 2],
@@ -67,7 +67,20 @@ sub defaultKeywords {
         xgettextp => [1, '2c'],
         npxgettext => ['1c', 2, 3],
         nxgettextp => [1, 2, '3c'],
-    );
+    ];
+}
+
+sub defaultFlags {
+	return [
+        "gettext:1:pass-perl-brace-format",
+        "ngettext:1:pass-perl-brace-format",
+        "ngettext:2:pass-perl-brace-format",
+        "pgettext:2:pass-perl-brace-format",
+        "npgettext:2:pass-perl-format",
+        "npgettext:3:pass-perl-format",
+        "npgettext:2:pass-perl-brace-format",
+        "npgettext:3:pass-perl-brace-format",
+	];
 }
 
 sub readFile {
@@ -106,7 +119,7 @@ sub split_text {
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
-    my $keywords = $self->{__xgettext}->getOption('keyword');
+    my $keywords = $self->{__xgettext}->option('keyword');
     
     my $ident;
     while (my $chunk = shift @$chunks) {
@@ -295,26 +308,18 @@ sub __extractEntry {
     $reference =~ s/-[1-9][0-9]*$//;
     $entry->reference($reference);
     
-    my $options = $self->{__xgettext}->options;
-    if ($options->{add_comments} && $text =~ /^#/) {
-        my @triggers = @{$options->{add_comments}};
-        foreach my $trigger (@triggers) {
-            if ($text =~ /^#[ \t\r\f\013]*$trigger/) {
-                my $comment = '';
-                my @lines = split /\n/, $text;
-                foreach my $line (@lines) {
-                    last if $line !~ s/^[ \t\r\f\013]*#[ \t\r\f\013]?//;
+    my $comment;
+    if ($text =~ /^#/) {
+        $comment = '';
+    	my @lines = split /\n/, $text;
+        foreach my $line (@lines) {
+            last if $line !~ s/^[ \t\r\f\013]*#[ \t\r\f\013]?//;
                             
-                    $comment .= $line . "\n";
-                }
-                chomp $comment;
-                $entry->automatic($comment);
-                last;
-            }
+            $comment .= $line . "\n";
         }
     }
-             
-    $self->{__xgettext}->addEntry($entry);
+
+    $self->{__xgettext}->addEntry($entry, $comment);
     
     return $self;
 }
