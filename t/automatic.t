@@ -38,4 +38,4 @@ my @po = Locale::XGettext::TT2->new({add_comments => ['TRANSLATORS:']},
                               ->run->po;
 is((scalar find_entries \@po, 
                msgid => qq{"Translator comment above.\\n"},
-               automatic => "TRANSLATORS: A translator comment."), 1);
+               automatic => "TRANSLATORS: A translator comment.\n"), 1);
