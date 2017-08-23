@@ -154,6 +154,7 @@ sub split_text {
                                   @$tokens[6 .. $#$tokens]);
         } else {
             for (my $i = 0; $i < @$tokens; $i += 2) {
+$DB::single = 1;
                 if ('FILTER' eq $tokens->[$i]
                     && 'IDENT' eq $tokens->[$i + 2]
                     && exists $keywords->{$tokens->[$i + 3]}
@@ -283,7 +284,7 @@ sub __extractEntry {
         $forms{msgid_plural} = $keyword->plural;
     }
 
-    if (defined $keyword->context) {
+    if ($keyword->context) {
         $min_args = $keyword->context if $keyword->context > $min_args;
         $forms{msgctxt} = $keyword->context;
     }
@@ -291,7 +292,7 @@ sub __extractEntry {
     my @args = $args->(@tokens);
              
     # Do we have enough arguments?
-    return if $min_args <= $#args;
+    return if $min_args > @args;
              
     my $entry = Locale::PO->new;
     foreach my $method (keys %forms) {
