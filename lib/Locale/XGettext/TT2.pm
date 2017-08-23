@@ -54,7 +54,7 @@ sub canKeywords {
 }
 
 sub defaultKeywords {
-    return [ 
+    return {
         gettext => [1],
         ngettext => [1, 2],
         pgettext => ['1c', 2],
@@ -67,7 +67,7 @@ sub defaultKeywords {
         xgettextp => [1, '2c'],
         npxgettext => ['1c', 2, 3],
         nxgettextp => [1, 2, '3c'],
-    ];
+    };
 }
 
 sub defaultFlags {
@@ -275,20 +275,23 @@ sub __extractEntry {
                     
         return @values;
     };
-                
-    my @forms = @{$keyword->forms};
-    my %forms = (msgid => $forms[0]);
-    $forms{msgid_plural} = $forms[1] if @forms > 1;
-    if (defined $keyword->context) {
-        push @forms, $keyword->context;
-        $forms{msgctxt} = $forms[-1];
+    
+    my $min_args = $keyword->singular; 
+    my %forms = (msgid => $keyword->singular);
+    if ($keyword->plural) {
+        $min_args = $keyword->plural if $keyword->plural > $min_args;
+        $forms{msgid_plural} = $keyword->plural;
     }
-    @forms = sort { $a <=> $b } @forms;
+
+    if (defined $keyword->context) {
+        $min_args = $keyword->context if $keyword->context > $min_args;
+        $forms{msgctxt} = $keyword->context;
+    }
 
     my @args = $args->(@tokens);
              
     # Do we have enough arguments?
-    return if $forms[-1] - 1 > $#args;
+    return if $min_args <= $#args;
              
     my $entry = Locale::PO->new;
     foreach my $method (keys %forms) {
