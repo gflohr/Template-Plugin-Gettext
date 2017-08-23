@@ -45,7 +45,7 @@ WriteMakefile (
         'Template' => '2.26',
         'Locale::PO' => '0.27',
     },
-    EXE_FILES => [],
+    EXE_FILES => ['bin/xgettext-tt2'],
     PL_FILES => {},
     (MM->can ('signature_target') ? (SIGN => 1) : ()),
     LICENSE => 'lgpl',
