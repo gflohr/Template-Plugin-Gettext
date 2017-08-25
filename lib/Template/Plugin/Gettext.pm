@@ -18,13 +18,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
 
+# ABSTRACT: Gettext Support For the Template Toolkit Version 2
+
 package Template::Plugin::Gettext;
 
 use strict;
 
 our $VERSION = 0.1;
 
-use Locale::TextDomain qw(com.cantanea.Template-Plugin-Gettext);
+use Locale::TextDomain 1.20 qw(com.cantanea.Template-Plugin-Gettext);
 use Locale::Messages;
 use Locale::Util qw(web_set_locale);
 
