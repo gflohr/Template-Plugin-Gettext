@@ -1,8 +1,8 @@
-# NAME
+=head1 NAME
 
 Template::Plugin::Gettext - Gettext Support For the Template Toolkit Version 2
 
-# SYNOPSIS
+=head1 SYNOPSIS
 
 Load the plug-in in templates:
 
@@ -29,9 +29,10 @@ Or filters:
     Hello, {name}!
     [% END %]
 
-# DESCRIPTION
+=head1 DESCRIPTION
 
-The **Template::Plugin::Gettext** plug-in makes the
-[GNU gettext API](https://www.gnu.org/software/gettext/) available for
+The B<Template::Plugin::Gettext> plug-in makes the
+L<GNU gettext API|https://www.gnu.org/software/gettext/> available for
 documents using the
-[Template Toolkit version 2](http://template-toolkit.org/).
+L<Template Toolkit version 2|http://template-toolkit.org/>.
+
