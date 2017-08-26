@@ -54,33 +54,34 @@ sub canKeywords {
 }
 
 sub defaultKeywords {
-    return {
-        gettext => [1],
-        ngettext => [1, 2],
-        pgettext => ['1c', 2],
-        gettextp => [1, '2c'],
-        npgettext => ['1c', 2, 3],
-        ngettextp => [1, 2, '3c'],
-        xgettext => [1],
-        nxgettext => [1, 2],
-        pxgettext => ['1c', 2],
-        xgettextp => [1, '2c'],
-        npxgettext => ['1c', 2, 3],
-        nxgettextp => [1, 2, '3c'],
-    };
+    return [
+               'gettext:1',
+               'ngettext:1,2',
+               'pgettext:1c,2',
+               'gettextp:1,2c',
+               'npgettext:1c,2,3',
+               'ngettextp:1,2,3c',
+               'xgettext:1',
+               'nxgettext:1,2',
+               'pxgettext:1c,2',
+               'xgettextp:1,2c',
+               'npxgettext:1c,2,3',
+               'nxgettextp:1,2,3c',
+       ];
 }
 
 sub defaultFlags {
-	return [
-        "gettext:1:pass-perl-brace-format",
-        "ngettext:1:pass-perl-brace-format",
-        "ngettext:2:pass-perl-brace-format",
-        "pgettext:2:pass-perl-brace-format",
-        "npgettext:2:pass-perl-format",
-        "npgettext:3:pass-perl-format",
-        "npgettext:2:pass-perl-brace-format",
-        "npgettext:3:pass-perl-brace-format",
-	];
+    return [
+               "xgettext:1:perl-brace-format",
+               "nxgettext:1:perl-brace-format",
+               "nxgettext:2:perl-brace-format",
+               "pxgettext:2:perl-brace-format",
+               "xgettextp:1:perl-brace-format",
+               "npxgettext:2:perl-brace-format",
+               "npxgettext:3:perl-brace-format",
+               "nxgettextp:1:perl-brace-format",
+               "nxgettextp:2:perl-brace-format",
+    ];
 }
 
 sub readFile {
@@ -292,7 +293,8 @@ sub __extractEntry {
              
     # Do we have enough arguments?
     return if $min_args > @args;
-             
+
+$DB::single = 1;             
     my $entry = {};
     foreach my $prop (keys %forms) {
         my $argno = $forms{$prop} - 1;
