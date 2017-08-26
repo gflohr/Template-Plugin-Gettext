@@ -36,8 +36,6 @@ use TestLib qw(find_entries);
 my @po = Locale::XGettext::TT2->new({add_comments => ['TRANSLATORS:']}, 
                                     'templates/template.tt')
                               ->run->po;
-                           use Data::Dumper;
-                           warn Dumper \@po;
 is((scalar find_entries \@po, 
                msgid => qq{"Translator comment above.\\n"},
                automatic => "TRANSLATORS: A translator comment.\n"), 1);

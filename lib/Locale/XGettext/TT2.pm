@@ -310,7 +310,7 @@ sub __extractEntry {
              
     my $reference = $self->{__xgettext_filename} . ':' . $lineno;
     $reference =~ s/-[1-9][0-9]*$//;
-    $entry->reference($reference);
+    $entry->{reference} = $reference;
     
     if ($text =~ /^#/) {
         my $comment = '';
