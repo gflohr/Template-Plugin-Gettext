@@ -120,7 +120,7 @@ sub split_text {
 
     my $chunks = $self->SUPER::split_text($text) or return;
 
-    my $keywords = $self->{__xgettext}->option('keyword');
+    my $keywords = $self->{__xgettext}->keywords;
     
     my $ident;
     while (my $chunk = shift @$chunks) {
@@ -294,7 +294,6 @@ sub __extractEntry {
     # Do we have enough arguments?
     return if $min_args > @args;
 
-$DB::single = 1;             
     my $entry = {};
     foreach my $prop (keys %forms) {
         my $argno = $forms{$prop} - 1;
