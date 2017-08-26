@@ -124,11 +124,11 @@ sub split_text {
     
     my $ident;
     while (my $chunk = shift @$chunks) {
-    	if (!ref $chunk) {
-    		shift @$chunks;
-    		next;
-    	}
-    	
+        if (!ref $chunk) {
+            shift @$chunks;
+            next;
+        }
+        
         my ($text, $lineno, $tokens) = @$chunk;
 
         next if !ref $tokens;
@@ -163,25 +163,25 @@ sub split_text {
                     my $keyword = $keywords->{$tokens->[$i + 3]};
                     # Inject the block contents as the first argument.
                     if ($i) {
-                    	my $first_arg;
-                    	if ($tokens->[$i - 2] eq 'LITERAL') {
+                        my $first_arg;
+                        if ($tokens->[$i - 2] eq 'LITERAL') {
                             $first_arg = $tokens->[$i - 1];
-                    	} else {
-                    		next;
-                    	}
+                        } else {
+                            next;
+                        }
                         splice @$tokens, 6 + $i, 0, 
                                'LITERAL', $first_arg, 'COMMA', ',';
                     } else {
-                    	next if !@$chunks;
-                    	my $first_arg;
-                    	if (ref $chunks->[0]) {
-                    	    next if $chunks->[0]->[2] ne 'ITEXT';
+                        next if !@$chunks;
+                        my $first_arg;
+                        if (ref $chunks->[0]) {
+                            next if $chunks->[0]->[2] ne 'ITEXT';
                             $first_arg = $chunks->[0]->[0];
-                    	} elsif ('TEXT' eq $chunks->[0]) {
-                    		$first_arg = $chunks->[1];
-                    	} else {
-                    		next;
-                    	}
+                        } elsif ('TEXT' eq $chunks->[0]) {
+                            $first_arg = $chunks->[1];
+                        } else {
+                            next;
+                        }
                         splice @$tokens, 6, 0, 
                                'LITERAL', $first_arg, 'COMMA', ',';
                     }
@@ -197,8 +197,8 @@ sub split_text {
 }
 
 sub __extractEntry {
-	my ($self, $text, $lineno, $keyword, @tokens) = @_;
-	
+    my ($self, $text, $lineno, $keyword, @tokens) = @_;
+    
     my $args = sub {
         my (@tokens) = @_;
         
@@ -214,30 +214,30 @@ sub __extractEntry {
                 push @values, $string;
                 splice @tokens, 0, 2;
             } elsif ('"' eq $tokens[0]) {
-            	if ('TEXT' eq $tokens[2]
-            	    && '"' eq $tokens[4]
-            	    && ('COMMA' eq $tokens[6]
-            	        || ')' eq $tokens[6])) {
-            	    push @values, $tokens[3];
-            	    splice @tokens, 6;	
-            	} else {
-              	    # String containing interpolated variables.
-            	    my $msg = __"Illegal variable interpolation at \"\$\"!";
-            	    push @values, \$msg;
-            	    while (@tokens) {
+                if ('TEXT' eq $tokens[2]
+                    && '"' eq $tokens[4]
+                    && ('COMMA' eq $tokens[6]
+                        || ')' eq $tokens[6])) {
+                    push @values, $tokens[3];
+                    splice @tokens, 6;    
+                } else {
+                      # String containing interpolated variables.
+                    my $msg = __"Illegal variable interpolation at \"\$\"!";
+                    push @values, \$msg;
+                    while (@tokens) {
                         last if 'COMMA' eq $tokens[0];
                         last if ')' eq $tokens[0];     
-                        shift @tokens;     		
-            	    }
-            	}
+                        shift @tokens;             
+                    }
+                }
             } elsif ('NUMBER' eq $tokens[0]) {
                 push @values, $tokens[1];
                 splice @tokens, 0, 2;
             } elsif ('IDENT' eq $tokens[0]) {
-            	# We store undef as the value because we cannot use it
-            	# anyway.
-            	push @values, undef;
-            	splice @tokens, 0, 2;
+                # We store undef as the value because we cannot use it
+                # anyway.
+                push @values, undef;
+                splice @tokens, 0, 2;
             } elsif ('(' eq $tokens[0]) {
                 splice @tokens, 0, 2;
                 my $nested = 1;
@@ -267,7 +267,7 @@ sub __extractEntry {
                 shift @tokens;
                 next;
             } elsif ('ASSIGN' eq $next && '=>' eq $tokens[0]) {
-            	shift @tokens;
+                shift @tokens;
                 next;
             }
 
@@ -303,7 +303,7 @@ $DB::single = 1;
         # undefined is not parsable or not valid.
         return if !defined $args[$argno];
         if (ref $args[$argno]) {
-        	my $filename = $self->{__xgettext_filename};
+            my $filename = $self->{__xgettext_filename};
             die "$filename:$lineno: ${$args[$argno]}\n" if ref $args[$argno];
         }
         $entry->{$prop} = $args[$argno];
@@ -315,7 +315,7 @@ $DB::single = 1;
     
     if ($text =~ /^#/) {
         my $comment = '';
-    	my @lines = split /\n/, $text;
+        my @lines = split /\n/, $text;
         foreach my $line (@lines) {
             last if $line !~ s/^[ \t\r\f\013]*#[ \t\r\f\013]?//;
                             
