@@ -154,7 +154,6 @@ sub split_text {
                                   @$tokens[6 .. $#$tokens]);
         } else {
             for (my $i = 0; $i < @$tokens; $i += 2) {
-$DB::single = 1;
                 if ('FILTER' eq $tokens->[$i]
                     && 'IDENT' eq $tokens->[$i + 2]
                     && exists $keywords->{$tokens->[$i + 3]}
@@ -294,9 +293,9 @@ sub __extractEntry {
     # Do we have enough arguments?
     return if $min_args > @args;
              
-    my $entry = Locale::PO->new;
-    foreach my $method (keys %forms) {
-        my $argno = $forms{$method} - 1;
+    my $entry = {};
+    foreach my $prop (keys %forms) {
+        my $argno = $forms{$prop} - 1;
                  
         # We are only interested in literal values.  Whatever is
         # undefined is not parsable or not valid.
@@ -305,25 +304,25 @@ sub __extractEntry {
         	my $filename = $self->{__xgettext_filename};
             die "$filename:$lineno: ${$args[$argno]}\n" if ref $args[$argno];
         }
-        $entry->$method($args[$argno]);
+        $entry->{$prop} = $args[$argno];
     }
              
     my $reference = $self->{__xgettext_filename} . ':' . $lineno;
     $reference =~ s/-[1-9][0-9]*$//;
     $entry->reference($reference);
     
-    my $comment;
     if ($text =~ /^#/) {
-        $comment = '';
+        my $comment = '';
     	my @lines = split /\n/, $text;
         foreach my $line (@lines) {
             last if $line !~ s/^[ \t\r\f\013]*#[ \t\r\f\013]?//;
                             
             $comment .= $line . "\n";
         }
+        $entry->{automatic} = $comment;
     }
 
-    $self->{__xgettext}->addEntry($entry, $comment);
+    $self->{__xgettext}->addEntry($entry);
     
     return $self;
 }
