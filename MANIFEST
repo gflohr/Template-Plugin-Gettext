@@ -10,6 +10,7 @@ README.pod
 bin/xgettext-tt2
 dist.ini
 lib/Locale/XGettext/TT2.pm
+lib/Locale/XGettext/TT2.pod
 lib/Template/Plugin/Gettext.pm
 lib/Template/Plugin/Gettext.pod
 perlcritic.rc
@@ -22,6 +23,7 @@ t/author-pod-syntax.t
 t/automatic.t
 t/basic.t
 t/expand.t
+t/filter-filter.t
 t/filter-method.t
 t/filter-pipe.t
 t/filter-xgettext.t

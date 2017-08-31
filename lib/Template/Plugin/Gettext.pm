@@ -35,7 +35,8 @@ use Cwd qw(abs_path);
 use base qw(Template::Plugin);
 
 my %bound_dirs;
-my @default_dirs;
+our @DEFAULT_DIRS;
+our @LOCALE_DIRS;
 
 sub __find_domain($);
 sub __expand($%);
@@ -43,11 +44,10 @@ sub __expand($%);
 BEGIN {
     foreach my $dir (qw('/usr/share/locale /usr/local/share/locale')) {
         if (-d $dir) {
-            push @default_dirs , $dir;
+            push @DEFAULT_DIRS, $dir;
             last;
         }
     }
-    Locale::Messages->select_package('gettext_pp');
 }
 
 sub new {
@@ -56,16 +56,21 @@ sub new {
     my $self = bless {}, $class;
 
     $textdomain = 'textdomain' unless defined $textdomain && length $textdomain;
+    $charset = 'utf-8' unless defined $charset && length $charset;
 
     unless (exists $bound_dirs{$textdomain}) {
-        @search_dirs = map $_ . '/LocaleData', @INC, @default_dirs
-            unless @search_dirs;
+        unless (@search_dirs) {
+            @search_dirs = map $_ . '/LocaleData', @INC;
+            push @search_dirs, @DEFAULT_DIRS;
+        }
+        unshift @search_dirs, @LOCALE_DIRS;
         $bound_dirs{$textdomain} = [@search_dirs];
     }
 
-    web_set_locale $language, $charset if defined $language;
+    my $set_locale = web_set_locale $language, $charset if defined $language;
 
     $self->{__textdomain} = $textdomain;
+    $self->{__locale} = $set_locale;
 
     $ctx->define_filter(gettext => sub {
         my ($context) = @_;
@@ -391,6 +396,10 @@ sub nxgettextp {
     push @args, %$pairs;
 
     return __nxgettextp $self->{__textdomain}, $msgid, @args;
+}
+
+sub debug_locale {
+    shift->{__locale};
 }
 
 sub __expand($%) {
