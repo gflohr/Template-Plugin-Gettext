@@ -294,7 +294,9 @@ sub __extractEntry {
     # Do we have enough arguments?
     return if $min_args > @args;
 
-    my $entry = {};
+    my $entry = {
+        keyword => $keyword->{function}
+    };
     foreach my $prop (keys %forms) {
         my $argno = $forms{$prop} - 1;
                  
