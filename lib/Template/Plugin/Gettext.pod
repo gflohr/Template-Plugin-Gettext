@@ -8,14 +8,14 @@ Template::Plugin::Gettext - Gettext Support For the Template Toolkit Version 2
 
 Load the plug-in in templates:
 
-    [% USE Gettext('com.textdomain.my' 'utf-8' 'DIRECTORIES'...) %]
+    [% USE Gettext('com.textdomain.my', 'fr', 'utf-8', 'DIRECTORIES'...) %]
     [% Gettext.gettext('Hello, world!) %]
 
     [% 'Hello, world!' | gettext %]
 
 Or alias "Gettext":
 
-    [% USE gtx = Gettext('com.textdomain.my' 'utf-8' 'DIRECTORIES'...) %]
+    [% USE gtx = Gettext('com.textdomain.my', 'fr', 'utf-8', 'DIRECTORIES'...) %]
     [% gtx.gettext('Hello, world!) %]
 
 Use method invocations:
@@ -310,6 +310,20 @@ instead, so that you can interpolate the value of B<COUNT>!
 
 Useless filter, provided for completeness.  Use nxgettextp()
 instead, so that you can interpolate the value of B<COUNT>!
+
+=item B<[% debug_locale %]>
+
+The plug-in implicitely calls B<web_set_locale()> (see
+L<Locale::Util>) if a language was specified in the B<USE> 
+statement.  The function B<debug_locale()> gives you the return
+value of the call for debugging purposes.  Example:
+
+    [% USE gxt = Gettext('com.mydomain.www', de') %]
+    
+    Using locale [% debug_locale() %].
+
+This way, you can determine whether setting the specified locale
+actually worked.
 
 =back
 

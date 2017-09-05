@@ -67,10 +67,8 @@ sub new {
         $bound_dirs{$textdomain} = [@search_dirs];
     }
 
-    my $set_locale = web_set_locale $language, $charset if defined $language;
-
     $self->{__textdomain} = $textdomain;
-    $self->{__locale} = $set_locale;
+    $self->{__locale} = web_set_locale $language, $charset if defined $language;
 
     $ctx->define_filter(gettext => sub {
         my ($context) = @_;
