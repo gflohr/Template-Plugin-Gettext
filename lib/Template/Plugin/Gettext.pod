@@ -231,11 +231,13 @@ You can use the following filters:
 =over 4
 
 =item B<[% STRING | gettext %]>
+
 =item B<[% FILTER gettext %]STRING[% FILTER %]>
 
 Retrieves the translation for B<STRING>.
 
 =item B<[% STRING | xgettext(PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2, ...) %]>
+
 =item B<[% FILTER xgettext(PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2, ...) %]STRING[% END %]>
 
 Gets the translation for a string with placeholders and interpolates values
@@ -245,6 +247,7 @@ left curly brace you can use this hack:
     [% "String with {LBRACE}PLACEHOLDERS{RBRACE}" | xgettext(LBRACE => "{", RBRACE => "}") %]
 
 =item B<[% STRING | gettextp(CONTEXT) %]>
+
 =item B<[% FILTER gettextp(CONTEXT) %]STRING[% END %]>
 
 Retrieves the translation for B<STRING> in context B<CONTEXT>.  You
@@ -253,6 +256,7 @@ require different translations depending on the context. See the
 docuemntation for pgettext() in L</FUNCTIONS> above for more details!
 
 =item B<[% STRING | xgettextp(CONTEXT, STRING, PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2) %]>
+
 =item B<[% FILTER xgettextp(CONTEXT, STRING, PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2) %]STRING[% END %]>
 
 Get the translation for B<STRING> with placeholders in context
@@ -260,6 +264,7 @@ B<CONTEXT>.  This is a mixture of C<xgettext()> and C<pgettext()>
 above.
 
 =item B<[% SINGULAR | nxgettext(PLURAL, COUNT, PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2) %]>
+
 =item B<[% FILTER nxgettext(PLURAL, COUNT, PLACEHOLDER1 =E<gt> VALUE1, PLACEHOLDER2 =E<gt> VALUE2) %]SINGULAR[% END %]>
 
 Retrieves the translation for the string with the singular form
@@ -287,6 +292,7 @@ cases.
 =item B<[% SINGULAR | nxgettextp(PLURAL, COUNT, CONTEXT,
                                  PLACEHOLDER1 =E<gt> VALUE1,
                                  PLACEHOLDER2 =E<gt> VALUE2) %]>
+
 =item B<[% FILTER nxgettextp(PLURAL, COUNT, CONTEXT,
                                  PLACEHOLDER1 =E<gt> VALUE1,
                                  PLACEHOLDER2 =E<gt> VALUE2) %]SINGULAR[% END %]>
@@ -300,12 +306,14 @@ The filter is a mixture of xgettext(), ngettext(), and
 pgettext(), see above!
 
 =item B<[% SINGULAR | ngettext(PLURAL, COUNT) %]>
+
 =item B<[% FILTER ngettext(PLURAL, COUNT) %]SINGULAR[% END %]>
 
 Useless filter, provided for completeness.  Use nxgettext()
 instead, so that you can interpolate the value of B<COUNT>!
 
 =item B<[% SINGULAR | ngettextp[(PLURAL, COUNT, CONTEXT) %]>
+
 =item B<[% FILTER | ngettextp[(PLURAL, COUNT, CONTEXT) %]SINGULAR[% END %]>
 
 Useless filter, provided for completeness.  Use nxgettextp()
