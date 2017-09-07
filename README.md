@@ -2,10 +2,6 @@
 
 Localization for the Template Toolkit 2
 
-## Status
-
-Pre-alpha, incomplete.
-
 ## Description
 
 This Perl library offers a complete solution for the Template Toolkit 2.
