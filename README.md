@@ -70,6 +70,7 @@ from where you invoke the template processor.
 
 The simplest and most common way of doing things is:
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     <title>[% gtx.gettext("World Of Themes") %]</title>
@@ -82,6 +83,7 @@ The simplest and most common way of doing things is:
     for the Template Toolkit.
     [% END %]
     </p>
+```
 
 This shows three different ways of localizing strings.  You can
 use the function `gtx.gettext()`, the filter `gettext` with pipe
@@ -97,9 +99,11 @@ gettext functions or filters is the lookup key into the translation
 database, when the template gets rendered.  That implies that this
 key has to be invariable and must not use any interpolated variables.
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     [% gtx.gettext("Hello, $firstname $lastname!") %]
+```
 
 This template code is syntactically correct and will also render
 correctly.  But `xgettext-tt2` will bail out on it with an error
@@ -114,6 +118,7 @@ the translation cannot be found.
 
 The correct way to interpolate strings uses `xgettext()`:
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     [% gtx.xgettext("Hello, {first} {last}!",
@@ -123,6 +128,7 @@ The correct way to interpolate strings uses `xgettext()`:
     [% FILTER xgettext(first => firstname, last => lastname) %]
     Hello, {first} {last}!
     [% END %]
+```
 
 One additional benefit of this is that the extractor program
 `xgettext-tt2` will also mark these strings with the flag
@@ -134,9 +140,11 @@ placeholders as the original.
 One thing that you should also avoid is to assemble strings
 in the template source code.  Do *not*:
 
+```html
     [% gtx.gettext("Please contact") %] [% name %]
     [% gtx.gettext("for help about the") %] [% package %]
     [% gtx.gettext("software.") %]
+```
 
 This will result in three translatable text snippets
 "Please contact", "for help about the", and "software." that
@@ -149,11 +157,13 @@ placeholders.
 
 Do *not* write this:
 
+```html
     [% IF num != 1 %]
     [% gtx.xgettext("{number} documents deleted!", number => num) %]
     [% ELSE %]
     [% gtx.gettext("One document deleted!") %]
     [% END %]
+```
 
 This assumes that every language has one singular and one plural
 (and no other forms) and that the condition that selects the correct
@@ -163,12 +173,14 @@ for example Russian (two plural forms), Chinese (no plural), French
 
 Write instead:
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     [% gtx.nxgettext("One document deleted.", 
                      "{count} documents deleted."
                      num,
                      count => num) %]
+```
 
 The function `nxgettext()` receives the singular and plural
 form as the first and second argument, followed by the number
@@ -188,6 +200,7 @@ not recommended.
 Sometimes an English string has different meanings in other
 languages:
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     [% gtx.gettext("State:") %]
@@ -197,6 +210,7 @@ languages:
     [% gtx.gettext("Closed") %]
     [% END %]
     <a href="/action/open">[% gtx.pgettext("action", "Open") %]</a>
+```
 
 The function `pgettext()` works like gettext but has one 
 extra argument preceding the string, the so-called
@@ -213,8 +227,10 @@ to do so, but not on your own behalf.
 There is also a function `pxgettext()` that supports placeholder
 interpolation, and `npxgettext()` that has the following semantics:
 
+```perl
     npxgettext(CONTEXT, SINGULAR, PLURAL, COUNT,
                KEY1 => VALUE1, KEY2 => VALUE2, ...)
+```
 
 #### More Esoteric Functions
 
@@ -228,10 +244,12 @@ You can add comments to the source code that are copied into the
 `.po` file as hints for the translators.  This will look like
 this:
 
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     <!-- TRANSLATORS: This is the day of the week! -->
     [% gtx.gettext("Sun") %]
+```
 
 In order to make that work, you have to invoke the extractor
 program `xgettext-tt2` like this:
@@ -242,13 +260,11 @@ program `xgettext-tt2` like this:
 
 In rare situations, you may need the following:
 
-```
-{% highlight html %}
+```html
     [% USE gtx = Gettext('com.mydomain.www', lang) %]
 
     <!-- xgettext:no-perl-brace-format -->
     [% gtx.xgettext("Value: {value}", value => whatever) %]
-{% endhighlight %}
 ```
 
 Normally, the argument of `xgettext()` will be flagged in
