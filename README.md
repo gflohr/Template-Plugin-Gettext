@@ -4,7 +4,7 @@ Localization for the Template Toolkit 2
 
 ## Description
 
-This Perl library offers a complete solution for the Template Toolkit 2.
+This Perl library offers a complete translation solution for the Template Toolkit 2.
 It consists of a plugin that offers translation functions inside templates
 and a string extractor `xgettext-tt2` that extracts translatable strings
 from templates and writes them to PO files (or rather a `.pot` file in PO
@@ -234,7 +234,7 @@ interpolation, and `npxgettext()` that has the following semantics:
 
 #### More Esoteric Functions
 
-The [API documentation](lib/Template/Plugin/Gettext.pod) contains
+The [API documentation](lib/Template/Plugin/Gettext.pod#user-content-FUNCTIONS) contains
 some more functions and filters that are available for completeness.
 You will never need them in normal projects.
 
