@@ -326,7 +326,7 @@ L<Locale::Util>) if a language was specified in the B<USE>
 statement.  The function B<debug_locale()> gives you the return
 value of the call for debugging purposes.  Example:
 
-    [% USE gxt = Gettext('com.mydomain.www', de') %]
+    [% USE gtx = Gettext('com.mydomain.www', de') %]
     
     Using locale [% debug_locale() %].
 
