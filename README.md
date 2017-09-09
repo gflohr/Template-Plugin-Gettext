@@ -153,6 +153,10 @@ illegal assumptions about the word order in translated sentences.
 Instead, use `xgettext()` and write in complete sentences with
 placeholders.
 
+By the way, the `x` in the function `xgettext()` stands for *eXpand*
+while the `x` in the program `xgettext-tt2` or GNU Gettext's
+`xgettext` program stands for *eXtract*.
+
 #### Plural Forms
 
 Do *not* write this:
@@ -276,3 +280,232 @@ You can override that default behavior for individual messages
 by placing a comment containing the string "xgettext:" directly
 in front of the string.
 
+### Translation Workflow
+
+The translation workflow is the standard workflow known from GNU 
+Gettext.  All files relevant for translations are conventionally
+kept in a subdirectory `po`.
+
+You can save time if you use the seed project
+[Template-Plugin-Gettext-Seed](https://github.com/gflohr/Template-Plugin-Gettext-Seed)
+as a base.  It contains a directory `po` ready for use,
+with --- at your choice --- a Makefile or a script `po-make.pl`
+that automates the entire translation workflow.  It is also
+prepared for extracting strings from other sources than
+template files.  In that example, these are Perl source files,
+but it will work in a similar fashion for other programming
+languages.
+
+But rolling your own version is also simple.  Just read on.
+
+#### Extracting Strings With `xgettext-tt2`
+
+Extracting translatable strings from templates for the Template
+Toolkit 2 is as easy as:
+
+```shell
+   $ xgettext-tt2 TEMPLATE....
+```
+
+This will scan all files given as arguments for translatable strings
+and create a file `messages.po` with the strings found.
+
+The normal invocation of `xgettext-tt2` is normally a little bit more
+sophisticated:
+
+```shell
+$ xgettext-tt2 --files-from=POTFILES \
+    --output=com.mydomain.www.pot \
+    --add-comments=TRANSLATORS: --from-code=utf-8 \
+    --force-po
+```
+
+You can, of course, write everyting in one line and omit the backslashes.
+
+Specifying all input files as arguments on the command-line can
+quickly become unwieldy.  It is more common to put the list of input
+files into a text file, each input file on one line, and instruct
+`xgettext-tt2` to read it with the option `--files-from`.  The name
+of the file is by convention `POTFILES`.
+
+The output file is normally a file `TEXTDOMAIN.pot`, where 
+`TEXTDOMAION` is the identifier selected in the templates.  The
+reverse hostname of the server serving the rendered templates
+is a good choice.
+
+If you want to be able to give hints to translators in the source
+files, you have to specify the trigger string --- normally
+"TRANSLATORS:" --- with the option `--add-comments`.  Specifying
+an empty string (`--add-comments=''`) instructs `xgettext-tt2` 
+to copy all comments into the `.pot` file.
+
+If your templates contain characters outside of US-ASCII, you should
+specify the character set of the template files with the option
+`--from-code=CODESET`.
+
+The option `--force-po` instructs `xgettext-tt2` to write an output
+file even if no translatable strings had been found.  But this
+is a matter of taste.  Omit the option, if you prefer it.
+
+`xgettext-tt2` has a lot more options.  They are mostly compatible
+with the ones of `xgettext` from GNU gettext for C, Perl, and
+a lot more languages.  See the [documentation for GNU Gettext's
+xgettext](https://www.gnu.org/software/gettext/manual/html_node/xgettext-Invocation.html)
+and the documentation for [Locale::XGettext](https://github.com/gflohr/Locale-XGettext/blob/master/lib/Locale/XGettext.pod)
+for more information.
+
+By the way, why is the ouput file a `.pot` file and not a `.po`
+file?  It is the *template* for the `.po` files for the individual
+languages.  You never edit that file, but re-generate it, whenever
+the source files have changed.  Hence, it only contains strings
+in the original, in the base language.
+
+#### Creating Translation Files
+
+For each supported language (except for the base language) you
+should create a file `LL.po`, where `LL` is the two-letter
+language code for that language, for example `fr.po`, `de.po`,
+or `it.po`.  You can also specify the combination of language
+and country like in `de_DE.po` or `pt_BR.po`.
+
+One option for that is to simply copy the `.pot` file and
+edit the header accordingly.  It is normally easier to do that
+with the program `msginit`:
+
+```
+$ msginit --input=com.mydomain.www.pot --locale=fr
+```
+
+Replace `TEXTDOMAIN.pot` with the name of the `.pot` file, and
+`fr` with the language in question.  This will prefill a lot
+of fields in the `.po` file.
+
+#### Compiling Translation Files
+
+The translated `.po` files are compiled with the program `msgfmt`:
+
+```shell
+$ msgfmt --check --statistics --verbose -o fr.mo fr.po
+fr.po: 212 translated messages, 1 fuzzy translation, 3 untranslated messages.
+```
+
+This will compile the translation file `fr.po` into a binary
+file `fr.mo`.  It also checks the translations for formal errors
+and print statistics about the number of translated and
+untranslated strings.
+
+#### Installing Translation Files
+
+The plugin does not use `.po` files for looking up translations
+but the binary `.mo` files.  But it has to find them.
+
+You have to decide for one of the directories that 
+`Template::Plugin::Gettext` searches for translations.  The
+default order is:
+
+* `@INC/LocaleData`
+* `/usr/share/locale`
+* `/usr/local/share/locale`
+
+The first line means that every directory `LocaleDir` inside
+Perl's include directories is searched for translation files.
+Keep in mind, that for security reasons the current directory
+(`.`) is nowadays often *not* in Perl's `@INC`.
+
+Let's assume that `/var/www/lib` is in Perl's @INC.  You would
+then install the French translation file `fr.mo` as `/var/www/lib/LocaleData/fr/LC_MESSAGES/com.mydomain.www.mo`.
+`TEXTDOMAIN` is a placeholder for the textdomain you have
+selected (and `LC_MESSAGES` is *not* a placeholder but a real 
+directory name).
+
+That is good except for the fact that `/var/www/lib` is usually
+not in Perl's `@INC`.  But you can change that where you invoke
+the template processor:
+
+```perl
+BEGIN {
+    unshift @INC, '/var/www/lib';
+}
+
+use Template;
+
+Template->new->process('template.html', $data);
+```
+
+You can completely override the default search order in the
+templates:
+
+```html
+[% USE gtx = Gettext('com.mydomain.www', lang, 'utf-8', 
+                     '/var/www/locale', '/srv/www/locale')]
+```
+
+Now, the French translation would be searched in 
+`/var/www/locale/fr/LC_MESSAGES/com.mydomain.www.mo` and 
+`/var/www/locale/fr/LC_MESSAGES/com.mydomain.www.mo`.
+
+#### Updating Translation Files
+
+Translations may become obsolete, when the source templates
+change.  In this case, you have to merge the new set of 
+translatable strings into the existing translation files.
+Fortunately, GNU Gettext makes this easy:
+
+```shell
+$ xgettext-tt2 --files-from=POTFILES \
+    --output=com.mydomain.www.pot \
+    --add-comments=TRANSLATORS: --from-code=utf-8 \
+    --force-po
+$ cp fr.po fr.old.po
+$ msgmerge fr.old.po com.mydomain.www.pot -o fr.po
+....... done
+```
+
+You first update the `.pot` file with `xgettext-tt2` so that it
+contains the current set of translatable strings.  You then
+make a backup of each `.po` file and then invoke the program
+`msgmerge` for merging the current translations from `fr.old.po`
+with the new set of strings from `com.mydomain.www.pot` into
+the updated translation file `fr.po`.
+
+The file `fr.po` will now contain the new strings as untranslated
+entries.  Strings that have only slightly change will retain their
+translations but they will be marked as "fuzzy", so that they
+can be reviewed by a translator.  Entries for strings that are
+no longer present in the sources are obsoleted.
+
+#### Integrating With Other Programming Languages
+
+The GNU Gettext framework is available for a lot of programming
+languages and it is not uncommon that two or more of these 
+languages are mixed in a project.  It is beneficial in these
+cases to use a common translation base for all used 
+technologies.
+
+`xgettext-tt2` is based on [`Locale-XGettext`](https://github.com/gflohr/Locale-XGettext)
+and therefore not only understands Template Toolkit templates
+but also `.po` and `.pot` files as input.  GNU Gettext's xgettext
+has the same feature.
+
+Accumulating all translatable strings from the different
+technologies is therefore very easy.  If you have a project
+that uses Template Toolkit for rendering web pages and Perl
+for the business logic you first extract strings from your 
+Perl files --- as usual --- with `xgettext` from GNU gettext
+into a temporary file, for example `plfiles.pot`.  Then you
+extract the strings from the templates with `xgettext-tt2` 
+from this library, but you specify `plfiles.pot` as an 
+additional input file.  Voilà! The output file of `xgettext-tt2`
+contains all the strings from the template files *plus* those
+from the Perl files in `plfiles.pot`.
+
+Of course, you can also do it the other way round, extract
+with `xgettext-tt2` into `ttfiles.pot`, and then feed that as
+an additional input file to GNU Gettext's `xgettext`.
+
+You can use the seed project [Template-Plugin-Gettext-Seed](https://github.com/gflohr/Template-Plugin-Gettext-Seed)
+as a fully functional starting point for such setups.
+
+## Author
+
+Template-Plugin-Gettext was written by [Guido Flohr](http://www.guido-flohr.net/).
