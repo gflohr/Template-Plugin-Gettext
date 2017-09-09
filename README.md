@@ -192,7 +192,7 @@ of items, followed by an arbitrary number of key/value pairs
 for interpolating variables in the strings.
 
 There is also a function `ngettext()` that does not expand
-its two first arguments.  You will find out that you almost
+its first two arguments.  You will find out that you almost
 never need that function.
 
 You can also use `nxgettext()` and `ngettext()` as filters.
@@ -495,7 +495,7 @@ Perl files --- as usual --- with `xgettext` from GNU gettext
 into a temporary file, for example `plfiles.pot`.  Then you
 extract the strings from the templates with `xgettext-tt2` 
 from this library, but you specify `plfiles.pot` as an 
-additional input file.  Voilà! The output file of `xgettext-tt2`
+additional input file. And now the output file of `xgettext-tt2`
 contains all the strings from the template files *plus* those
 from the Perl files in `plfiles.pot`.
 
