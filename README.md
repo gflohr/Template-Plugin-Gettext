@@ -506,6 +506,10 @@ an additional input file to GNU Gettext's `xgettext`.
 You can use the seed project [Template-Plugin-Gettext-Seed](https://github.com/gflohr/Template-Plugin-Gettext-Seed)
 as a fully functional starting point for such setups.
 
+## Bugs
+
+Please report bugs at [https://github.com/gflohr/Template-Plugin-Gettext/issues](https://github.com/gflohr/Template-Plugin-Gettext/issues)
+
 ## Author
 
 Template-Plugin-Gettext was written by [Guido Flohr](http://www.guido-flohr.net/).
