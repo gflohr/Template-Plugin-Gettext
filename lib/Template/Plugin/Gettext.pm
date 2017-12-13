@@ -35,6 +35,8 @@ use Cwd qw(abs_path);
 use base qw(Template::Plugin);
 
 my %bound_dirs;
+my %textdomains;
+
 our @DEFAULT_DIRS;
 our @LOCALE_DIRS;
 
@@ -57,6 +59,9 @@ sub new {
 
     $textdomain = 'textdomain' unless defined $textdomain && length $textdomain;
     $charset = 'utf-8' unless defined $charset && length $charset;
+
+    my $template = $ctx->stash->get('template')->name;
+    $textdomains{$textdomain}->{$template} = 1;
 
     unless (exists $bound_dirs{$textdomain}) {
         unless (@search_dirs) {
@@ -442,6 +447,14 @@ sub __find_domain($) {
     delete $bound_dirs{$domain};
 
     return 1;
+}
+
+sub textdomains {
+    return %textdomains;
+}
+
+sub resetTextdomains {
+    undef %textdomains;
 }
 
 1;
