@@ -24,7 +24,7 @@ package Template::Plugin::Gettext;
 
 use strict;
 
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 
 use Locale::TextDomain 1.20 qw(com.cantanea.Template-Plugin-Gettext);
 use Locale::Messages;
@@ -60,7 +60,7 @@ sub new {
     $textdomain = 'textdomain' unless defined $textdomain && length $textdomain;
     $charset = 'utf-8' unless defined $charset && length $charset;
 
-    my $template = $ctx->stash->get('template')->name;
+    my $template = $ctx->stash->get('component')->name;
     $textdomains{$textdomain}->{$template} = 1;
 
     unless (exists $bound_dirs{$textdomain}) {
