@@ -148,47 +148,45 @@ sub split_text {
 
         next if !defined $ident;
 
-        if ('IDENT' eq $tokens->[0] && $ident eq $tokens->[1]
-            && 'DOT' eq $tokens->[2] && 'IDENT' eq $tokens->[4]
-            && exists $keywords->{$tokens->[5]}) {
-            my $keyword = $keywords->{$tokens->[5]};
-            $self->__extractEntry($text, $lineno, $keyword, 
-                                  @$tokens[6 .. $#$tokens]);
-        } else {
-            for (my $i = 0; $i < @$tokens; $i += 2) {
-                if ('FILTER' eq $tokens->[$i]
+        for (my $i = 0; $i < @$tokens; $i += 2) {
+            if ('IDENT' eq $tokens->[$i] && $ident eq $tokens->[$i + 1]
+                && 'DOT' eq $tokens->[$i + 2] && 'IDENT' eq $tokens->[$i + 4]
+                && exists $keywords->{$tokens->[$i + 5]}) {
+                my $keyword = $keywords->{$tokens->[$i + 5]};
+                $self->__extractEntry($text, $lineno, $keyword, 
+                                    @$tokens[$i + 6 .. $#$tokens]);
+            } elsif ('FILTER' eq $tokens->[$i]
                     && 'IDENT' eq $tokens->[$i + 2]
                     && exists $keywords->{$tokens->[$i + 3]}
                     && '(' eq $tokens->[$i + 4]) {
-                    my @tokens;
-                    my $keyword = $keywords->{$tokens->[$i + 3]};
-                    # Inject the block contents as the first argument.
-                    if ($i) {
-                        my $first_arg;
-                        if ($tokens->[$i - 2] eq 'LITERAL') {
-                            $first_arg = $tokens->[$i - 1];
-                        } else {
-                            next;
-                        }
-                        splice @$tokens, 6 + $i, 0, 
-                               'LITERAL', $first_arg, 'COMMA', ',';
+                my @tokens;
+                my $keyword = $keywords->{$tokens->[$i + 3]};
+                # Inject the block contents as the first argument.
+                if ($i) {
+                    my $first_arg;
+                    if ($tokens->[$i - 2] eq 'LITERAL') {
+                        $first_arg = $tokens->[$i - 1];
                     } else {
-                        next if !@$chunks;
-                        my $first_arg;
-                        if (ref $chunks->[0]) {
-                            next if $chunks->[0]->[2] ne 'ITEXT';
-                            $first_arg = $chunks->[0]->[0];
-                        } elsif ('TEXT' eq $chunks->[0]) {
-                            $first_arg = $chunks->[1];
-                        } else {
-                            next;
-                        }
-                        splice @$tokens, 6, 0, 
-                               'LITERAL', $first_arg, 'COMMA', ',';
+                        next;
                     }
-                    $self->__extractEntry($text, $lineno, $keyword,
-                                          @$tokens[$i + 4 .. $#$tokens]);
+                    splice @$tokens, 6 + $i, 0, 
+                        'LITERAL', $first_arg, 'COMMA', ',';
+                } else {
+                    next if !@$chunks;
+                    my $first_arg;
+                    if (ref $chunks->[0]) {
+                        next if $chunks->[0]->[2] ne 'ITEXT';
+                        $first_arg = $chunks->[0]->[0];
+                    } elsif ('TEXT' eq $chunks->[0]) {
+                        $first_arg = $chunks->[1];
+                    } else {
+                        next;
+                    }
+                    splice @$tokens, 6, 0, 
+                        'LITERAL', $first_arg, 'COMMA', ',';
                 }
+                $self->__extractEntry($text, $lineno, $keyword,
+                                    @$tokens[$i + 4 .. $#$tokens]);
             }
         }
     }
