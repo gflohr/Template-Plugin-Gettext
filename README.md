@@ -4,11 +4,13 @@ Localization for the Template Toolkit 2
 
 ## Description
 
-This Perl library offers a complete translation solution for the Template Toolkit 2.
+This Perl library offers an end-to-end localization and internationalization solution for the Template Toolkit 2.
 It consists of a plugin that offers translation functions inside templates
 and a string extractor `xgettext-tt2` that extracts translatable strings
 from templates and writes them to PO files (or rather a `.pot` file in PO
-format).
+format).  The string extractor `xgettext-tt2` is fully
+customizable and also usable for other i18n plugins or
+frameworks for the Template Toolkit.
 
 ## Usage
 
