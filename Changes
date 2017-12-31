@@ -1,2 +1,6 @@
+{{$NEXT}}
+        - Extract nested method invocations.
+        - Remember all files using a certain textdomain.
+
 0.1 2017-09-10
         - Initial version.
