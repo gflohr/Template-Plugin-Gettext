@@ -347,6 +347,11 @@ invoked the plug-in, and the values are the corresponding template file names.
 The purpose of this method is to allow harvesting files that should be
 processed by L<xgettext-tt2>.
 
+If the template is either "input text" or "input file handle", the template
+variable C<gettext_filename> - if existing - is assumed as the template
+name.  Rationale: "input text" and "input file handle" are used by the
+Template Toolkit as aliases, when reading from a scalar or a file handle.
+
 =item B<resetTextdomains>
 
 Resets the hash described above for B<textdomain()> to its initial, empty
