@@ -24,8 +24,6 @@ package Template::Plugin::Gettext;
 
 use strict;
 
-our $VERSION = 0.2;
-
 use Locale::TextDomain 1.20 qw(com.cantanea.Template-Plugin-Gettext);
 use Locale::Messages;
 use Locale::Util qw(web_set_locale);
