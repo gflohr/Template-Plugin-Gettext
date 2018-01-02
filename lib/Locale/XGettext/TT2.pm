@@ -54,6 +54,17 @@ sub canKeywords {
     shift;
 }
 
+sub languageSpecificOptions {
+    return [
+        [
+            'plugin|plug-in=s',
+            'plug_in',
+            '    --plug-in=PLUG-IN, --plugin=PLUG-IN',
+            __"the plug-in name (defaults to 'Gettext')",
+        ]
+    ];
+}
+
 sub defaultKeywords {
     return [
                'gettext:1',
@@ -122,7 +133,9 @@ sub split_text {
     my $chunks = $self->SUPER::split_text($text) or return;
 
     my $keywords = $self->{__xgettext}->keywords;
-    
+    my $plug_in = $self->{__xgettext}->option('plug_in');
+    $plug_in = 'Gettext' if !defined $plug_in;
+
     my $ident;
     while (my $chunk = shift @$chunks) {
         if (!ref $chunk) {
@@ -135,12 +148,12 @@ sub split_text {
         next if !ref $tokens;
 
         if ('USE' eq $tokens->[0] && 'IDENT' eq $tokens->[2]) {
-            if ('Gettext' eq $tokens->[3]
+            if ($plug_in eq $tokens->[3]
                 && (4 == @$tokens
                     || '(' eq $tokens->[4])) {
-                $ident = 'Gettext';
+                $ident = $plug_in;
             } elsif ('ASSIGN' eq $tokens->[4] && 'IDENT' eq $tokens->[6]
-                     && 'Gettext' eq $tokens->[7]) {
+                     && $plug_in eq $tokens->[7]) {
                 $ident = $tokens->[3];
             }
             next;
