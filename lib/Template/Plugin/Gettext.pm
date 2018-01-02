@@ -62,7 +62,6 @@ sub new {
 
     my $template = $ctx->stash->get('component')->name;
     if ('input text' eq $template || 'input file handle' eq $template) {
-            $DB::single = 1;
         my $maybe_template = $ctx->stash->get('gettext_filename');
         $template = $maybe_template
             if defined $maybe_template && length $maybe_template;
