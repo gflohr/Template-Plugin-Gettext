@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.3  2018-01-02
         - New option '--plug-in' allows overriding the plug-in name,
           see (https://github.com/gflohr/Template-Plugin-Gettext/issues/1)
 
