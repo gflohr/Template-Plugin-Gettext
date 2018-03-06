@@ -36,7 +36,7 @@ There is NO WARRANTY, to the extent permitted by law.
 Written by Guido Flohr (http://www.guido-flohr.net/).
 ',
     program => $0, years => '2016-2018',
-    version => $Locale::XGettext::VERSION);
+    version => $Locale::XGettext::TT2::VERSION);
 }
 
 sub fileInformation {
