@@ -41,8 +41,10 @@ Written by Guido Flohr (http://www.guido-flohr.net/).
 
 sub fileInformation {
     return __(<<EOF);
-Input files are interpreted as plain text files with each paragraph being
-a separately translatable unit.
+The input files should be templates for the Template::Toolkit
+(http://www.template-toolkit.org/).  The strings are usually marked and
+made translatable with the help of "Template::Plugin::Gettext".  Try the
+command "perldoc Template::Plugin::Gettext" for more information.
 EOF
 }
 
