@@ -57,10 +57,10 @@ sub canKeywords {
 sub languageSpecificOptions {
     return [
         [
-            'plugin|plug-in=s',
+            'plugin|plug-in:s',
             'plug_in',
             '    --plug-in=PLUG-IN, --plugin=PLUG-IN',
-            __"the plug-in name (defaults to 'Gettext')",
+            __"the plug-in name (defaults to 'Gettext'), can be an empty string",
         ]
     ];
 }
@@ -137,6 +137,7 @@ sub split_text {
     $plug_in = 'Gettext' if !defined $plug_in;
 
     my $ident;
+    my $lplug_in = length $plug_in;
     while (my $chunk = shift @$chunks) {
         if (!ref $chunk) {
             shift @$chunks;
@@ -147,26 +148,31 @@ sub split_text {
 
         next if !ref $tokens;
 
-        if ('USE' eq $tokens->[0] && 'IDENT' eq $tokens->[2]) {
-            if ($plug_in eq $tokens->[3]
-                && (4 == @$tokens
-                    || '(' eq $tokens->[4])) {
-                $ident = $plug_in;
-            } elsif ('ASSIGN' eq $tokens->[4] && 'IDENT' eq $tokens->[6]
-                     && $plug_in eq $tokens->[7]) {
-                $ident = $tokens->[3];
+        if ($lplug_in) {
+            if ('USE' eq $tokens->[0] && 'IDENT' eq $tokens->[2]) {
+                if ($plug_in eq $tokens->[3]
+                    && (4 == @$tokens
+                        || '(' eq $tokens->[4])) {
+                    $ident = $plug_in;
+                } elsif ('ASSIGN' eq $tokens->[4] && 'IDENT' eq $tokens->[6]
+                        && $plug_in eq $tokens->[7]) {
+                    $ident = $tokens->[3];
+                }
+                next;
             }
-            next;
-        }
 
-        next if !defined $ident;
+            next if !defined $ident;
+        } else {
+            $ident = '';
+        }
 
         for (my $i = 0; $i < @$tokens; $i += 2) {
             # FIXME! It would be better to copy $tokens into an array
             # @tokens because we modify the array reference $tokens.
             # That implies that we iterate over tokens that do ot exist
             # and that is an unnecessary risk.
-            if ('IDENT' eq $tokens->[$i] && $ident eq $tokens->[$i + 1]
+            if ($lplug_in
+                && 'IDENT' eq $tokens->[$i] && $ident eq $tokens->[$i + 1]
                 && 'DOT' eq $tokens->[$i + 2] && 'IDENT' eq $tokens->[$i + 4]
                 && exists $keywords->{$tokens->[$i + 5]}) {
                 my $keyword = $keywords->{$tokens->[$i + 5]};
@@ -218,6 +224,11 @@ sub split_text {
                 }
                 $self->__extractEntry($text, $lineno, $keyword,
                                     @$tokens[$i + 4 .. $#$tokens]);
+            } elsif (!$lplug_in && 'IDENT' eq $tokens->[$i]
+                     && exists $keywords->{$tokens->[$i + 1]}) {
+                my $keyword = $keywords->{$tokens->[$i + 1]};
+                $self->__extractEntry($text, $lineno, $keyword,
+                                    @$tokens[$i + 2 .. $#$tokens]);
             }
         }
     }
