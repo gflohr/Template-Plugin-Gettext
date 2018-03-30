@@ -1,4 +1,8 @@
 {{$NEXT}}
+        - Re-allow relative paths.  Otherwise common POTFILES files cannot
+          be read.
+
+0.5  2018-03-27
         - Template::Plugin::Gettext now automatically sets the utf8 flag
           on translated strings, when the original string (the msgid) had
           the utf8 flag set.

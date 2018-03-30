@@ -102,7 +102,9 @@ sub readFile {
     my ($self, $filename) = @_;
 
     my %options = (
-        ABSOLUTE => 1
+        ABSOLUTE => 1,
+        # Needed for reading from POTFILES
+        RELATIVE => 1
     );
 
     my $parser = Locale::XGettext::TT2::Parser->new(\%options);
