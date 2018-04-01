@@ -27,6 +27,7 @@ use strict;
 use Locale::TextDomain 1.20 qw(com.cantanea.Template-Plugin-Gettext);
 use Locale::Messages;
 use Locale::Util qw(web_set_locale);
+use Encode;
 
 use Cwd qw(abs_path);
 

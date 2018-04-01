@@ -24,6 +24,7 @@ my %WriteMakefileArgs = (
   "NAME" => "Template::Plugin::Gettext",
   "PREREQ_PM" => {
     "Cwd" => 0,
+    "Encode" => 0,
     "Getopt::Long" => 0,
     "Locale::Messages" => 0,
     "Locale::TextDomain" => "1.20",
@@ -50,6 +51,7 @@ my %WriteMakefileArgs = (
 
 my %FallbackPrereqs = (
   "Cwd" => 0,
+  "Encode" => 0,
   "File::Spec" => 0,
   "Getopt::Long" => 0,
   "Locale::Messages" => 0,

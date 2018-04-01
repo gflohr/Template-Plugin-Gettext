@@ -25,6 +25,7 @@ my %module_build_args = (
   "recursive_test_files" => 1,
   "requires" => {
     "Cwd" => 0,
+    "Encode" => 0,
     "Getopt::Long" => 0,
     "Locale::Messages" => 0,
     "Locale::TextDomain" => "1.20",
