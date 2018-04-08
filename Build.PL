@@ -19,7 +19,7 @@ my %module_build_args = (
     "Guido Flohr <guido.flohr\@cantanea.com>"
   ],
   "dist_name" => "Template-Plugin-Gettext",
-  "dist_version" => "0.5",
+  "dist_version" => "0.6",
   "license" => "lgpl",
   "module_name" => "Template::Plugin::Gettext",
   "recursive_test_files" => 1,
