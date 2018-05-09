@@ -1,7 +1,7 @@
 {{$NEXT}}
         - Re-allow relative paths (was broken in 0.5).  Otherwise common
           POTFILES files cannot be read.
-        - Allow argument to --plug-in to be empty so that you can extracts
+        - Allow argument to --plug-in to be empty so that you can extract
           arguments from functions in the TT2 root namespace. 
 
 0.5  2018-03-27
