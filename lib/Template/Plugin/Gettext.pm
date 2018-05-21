@@ -198,9 +198,8 @@ sub __fixup {
     }
     my $ref = @_ > 2 && $count != 1 ? $msgid_plural : $msgid;
     my $trans = $_[-1];
-    if ($trans ne $ref && Encode::is_utf8($ref, 0)) {
-        Encode::_utf8_on($trans);
-    }
+
+    Encode::_utf8_on($trans);
 
     return $trans;
 }
