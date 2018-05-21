@@ -191,12 +191,6 @@ sub new {
 }
 
 sub __fixup {
-    my ($msgid, $trans, $msgid_plural, $count) = @_;
-
-    if (@_ > 2) {
-        ($trans, $msgid_plural, $count) = ($msgid_plural, $count, $trans);
-    }
-    my $ref = @_ > 2 && $count != 1 ? $msgid_plural : $msgid;
     my $trans = $_[-1];
 
     Encode::_utf8_on($trans);
