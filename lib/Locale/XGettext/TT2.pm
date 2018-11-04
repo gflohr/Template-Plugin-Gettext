@@ -25,6 +25,7 @@ use strict;
 use Locale::TextDomain qw(Template-Plugin-Gettext);
 use Template;
 
+use Locale::XGettext 0.7;
 use base qw(Locale::XGettext);
 
 sub versionInformation {
