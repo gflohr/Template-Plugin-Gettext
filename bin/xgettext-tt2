@@ -30,9 +30,7 @@ my %options;
 
 Locale::XGettext::TT2->newFromArgv(\@ARGV)->run->output;
 
-=head1 xgettext-tt2
-
-Extract translatable strings from Template Toolkit 2 templates
+=head1 NAME xgettext-tt2 - Extract translatable strings from Template Toolkit 2 templates
 
 =head1 SYNOPSIS
 

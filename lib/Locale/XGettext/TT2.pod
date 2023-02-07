@@ -1,4 +1,4 @@
-=head1 Locale::XGettext::TT2
+=head1 NAME Locale::XGettext::TT2
 
 Extract translatable strings from template files for the
 Template Toolkit version 2.
