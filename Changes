@@ -1,4 +1,6 @@
 {{$NEXT}}
+	- Fixed spelling errors.
+	- Documentation.
 
 0.7  2018-11-04
         - Always set utf8 flag on translations.
